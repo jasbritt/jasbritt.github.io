@@ -1,0 +1,3697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>UAM‑ECS Urban Air Mobility Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #222;
+      height: 100%;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: #0067b3; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #ffffff;
+      padding: 8px 16px;
+      border-bottom: 1px solid #d0d0d0;
+      position: relative;
+      z-index: 50;
+    }
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: #0074c1;
+      font-size: 18px;
+    }
+    .brand-logo {
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #0074c1, #00a8e8);
+    }
+
+    .top-menu {
+      display: flex;
+      gap: 12px;
+      font-size: 13px;
+      color: #444;
+      position: relative;
+    }
+    .menu-item {
+      position: relative;
+    }
+    .menu-label {
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 3px;
+    }
+    .menu-item:hover .menu-label {
+      background-color: #e5f1fb;
+    }
+    .dropdown {
+      position: absolute;
+      top: 26px;
+      left: 0;
+      background: #ffffff;
+      border: 1px solid #cccccc;
+      border-radius: 3px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      min-width: 190px;
+      padding: 4px 0;
+      font-size: 12px;
+      display: none;
+      z-index: 60;
+    }
+    .dropdown.visible {
+      display: block;
+    }
+    .dropdown-item {
+      padding: 5px 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dropdown-item:hover {
+      background-color: #e5f1fb;
+    }
+    .dropdown-tick {
+      font-size: 12px;
+      color: #000;
+      margin-left: 8px;
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .icon-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 3px;
+      border: 1px solid #cccccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .icon-btn[disabled] {
+      opacity: 0.3;
+      cursor: default;
+    }
+    .icon-btn:not([disabled]):hover {
+      background-color: #f0f4f8;
+    }
+    .primary-btn {
+      padding: 6px 12px;
+      border-radius: 3px;
+      border: 1px solid #0074c1;
+      background-color: #0074c1;
+      color: #ffffff;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .primary-btn:hover {
+      background-color: #005f9f;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 12px;
+      gap: 10px;
+    }
+    .top-panels {
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 2.1fr) minmax(0, 1fr);
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .panel {
+      background-color: #ffffff;
+      border-radius: 3px;
+      border: 1px solid #d0d0d0;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      background-color: #e3e3e3;
+      border-bottom: 1px solid #cccccc;
+      padding: 5px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+    }
+    .panel-header span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .collapse-icon {
+      display: inline-block;
+      font-size: 10px;
+      margin-right: 4px;
+      transition: transform 0.15s ease-out;
+    }
+    .panel-body {
+      padding: 8px 10px 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .panel.collapsed .panel-body {
+      display: none;
+    }
+
+    .chart-area {
+      flex: 1;
+      border-left: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+      min-height: 160px;
+    }
+    .chart-x-axis,
+    .chart-y-axis {
+      position: absolute;
+      font-size: 10px;
+      color: #555;
+      font-weight: 500;
+    }
+    .chart-x-axis {
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .chart-y-axis {
+      top: 50%;
+      left: 12px;
+      writing-mode: vertical-rl;
+      transform: translateY(-50%) rotate(180deg);
+      white-space: nowrap;
+    }
+    .chart-grid {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .chart-grid.interactive {
+      pointer-events: auto;
+    }
+    .chart-grid line {
+      stroke: #e0e0e0;
+      stroke-width: 1;
+    }
+    .chart-grid .axis {
+      stroke: #a0a0a0;
+      stroke-width: 1.5;
+    }
+    .chart-ticks {
+      position: absolute;
+      font-size: 9px;
+      color: #777;
+      pointer-events: none;
+    }
+    .chart-ticks.x {
+      bottom: 14px;
+      left: 40px;
+      right: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .chart-ticks.y {
+      top: 6px;
+      bottom: 38px;
+      left: 28px;
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      text-align: left;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      background-color: #f2f2f2;
+    }
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+    .swatch-air-taxi { background-color: #ff9933; }
+    .swatch-ground-taxi { background-color: #3366cc; }
+    .swatch-electric { background-color: #33aa55; }
+    .swatch-infra { background-color: #cc33aa; }
+    .swatch-other { background-color: #999999; }
+
+    .chart-footer {
+      margin-top: 6px;
+      display: flex;
+      gap: 4px;
+    }
+    .badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      border: 1px solid #222;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-baseline {
+      background-color: #222;
+      color: #fff;
+    }
+    .badge-current {
+      background-color: #00a0e3;
+      border-color: #00a0e3;
+      color: #fff;
+    }
+
+    .temperature-panel {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 8px;
+      padding: 16px;
+      min-height: 240px;
+      display: flex;
+    }
+    .temp-big {
+      font-size: 46px;
+      font-weight: 600;
+      color: #0089d6;
+    }
+    .temp-small {
+      font-size: 18px;
+      color: #00a66b;
+    }
+    .temp-caption {
+      font-size: 13px;
+      color: #333;
+      margin-top: 4px;
+    }
+    .temp-subcaption {
+      font-size: 11px;
+      color: #777;
+    }
+    .env-cost-toggle {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #555;
+    }
+    .env-cost-toggle button {
+      font-size: 11px;
+      padding: 4px 8px;
+      margin-right: 4px;
+      border-radius: 2px;
+      border: 1px solid #bbb;
+      background-color: #f8f8f8;
+      cursor: pointer;
+    }
+    .env-cost-toggle button.active {
+      background-color: #0074c1;
+      color: #fff;
+      border-color: #0074c1;
+    }
+
+    .slider-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 4px;
+      align-items: flex-start;
+    }
+    .slider-group {
+      background-color: #ffffff;
+      border-radius: 3px;
+      border: 1px solid #d0d0d0;
+      padding: 6px 8px 10px;
+      font-size: 11px;
+    }
+    .slider-group-title {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+      color: #555;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .slider-label-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 0 0 55%;
+    }
+    .slider-label {
+      font-size: 11px;
+      color: #222;
+    }
+    .info-btn {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid #777;
+      font-size: 10px;
+      line-height: 12px;
+      text-align: center;
+      cursor: pointer;
+      background-color: #f7f7f7;
+    }
+    .slider-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .slider-track-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #dcdcdc;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #0074c1;
+      border: 1px solid #004b7a;
+      position: relative;
+      z-index: 2;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #0074c1;
+      border: 1px solid #004b7a;
+      position: relative;
+      z-index: 2;
+    }
+    .constraint-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cc0000;
+      border: 1px solid #990000;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .constraint-dot-min {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff9933;
+      border: 1px solid #cc7a1a;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+      pointer-events: none;
+    }
+    .slider-status {
+      font-size: 9px;
+      color: #777;
+      white-space: nowrap;
+    }
+
+    .bottom-brand {
+      margin-top: 4px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      color: #666;
+    }
+    .secondary-btn {
+      border-radius: 3px;
+      border: 1px solid #bbbbbb;
+      background-color: #ffffff;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 10px;
+    }
+    .secondary-btn:hover {
+      background-color: #f5f5f5;
+    }
+    .bottom-link {
+      color: #666;
+      text-decoration: underline;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.visible {
+      display: flex;
+    }
+    .modal {
+      background: #ffffff;
+      border-radius: 4px;
+      padding: 14px 16px 12px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      position: relative;
+      font-size: 12px;
+    }
+    .modal-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .modal-close {
+      position: absolute;
+      right: 8px;
+      top: 6px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      color: #666;
+    }
+    .modal-body {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #333;
+    }
+    .modal-input-row {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .modal-input-row input[type="number"],
+    .modal-input-row textarea {
+      flex: 1;
+      padding: 4px 6px;
+      font-size: 11px;
+      border-radius: 3px;
+      border: 1px solid #cccccc;
+    }
+    .modal-input-row textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .modal-help {
+      margin-top: 4px;
+      font-size: 10px;
+      color: #777;
+    }
+    .modal-error {
+      margin-top: 4px;
+      font-size: 10px;
+      color: red;
+      display: none;
+    }
+
+    .share-dropdown {
+      position: absolute;
+      right: 16px;
+      top: 42px;
+      width: 260px;
+      background: #ffffff;
+      border-radius: 3px;
+      border: 1px solid #cccccc;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+      padding: 10px 10px 8px;
+      font-size: 11px;
+      z-index: 900;
+      display: none;
+    }
+    .share-dropdown.visible { display: block; }
+    .share-dropdown-label {
+      margin-bottom: 4px;
+      color: #333;
+    }
+    .share-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .share-input-row input {
+      flex: 1;
+      padding: 4px 6px;
+      font-size: 11px;
+      border-radius: 3px;
+      border: 1px solid #cccccc;
+    }
+    .share-send-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 3px;
+      border: 1px solid #0074c1;
+      background-color: #0074c1;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 180px;
+      background-color: rgba(0,0,0,0.85);
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 4px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1100;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .toast.show { opacity: 1; }
+
+    #aboutModal .modal {
+      max-width: 720px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 1100px) {
+      .top-panels {
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.5fr);
+      }
+      .temperature-panel {
+        grid-column: 1 / -1;
+        flex-direction: row;
+      }
+    }
+    @media (max-width: 800px) {
+      .top-panels {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .slider-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .top-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .top-menu { flex-wrap: wrap; }
+    }
+
+    /* Equations page */
+    #equationsPage {
+      display: none;
+      padding: 20px 30px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .eq-back-btn {
+      background: #0074c1; color: #fff; border: none; padding: 8px 18px;
+      border-radius: 6px; cursor: pointer; font-size: 13px; margin-bottom: 16px;
+    }
+    .eq-back-btn:hover { background: #005a99; }
+    .eq-page-title { font-size: 22px; font-weight: 700; color: #222; margin-bottom: 4px; }
+    .eq-page-subtitle { font-size: 12px; color: #888; margin-bottom: 18px; line-height: 1.5; }
+    .eq-section { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+    .eq-section-title {
+      background: #f0f4f8; padding: 10px 14px; font-weight: 600; font-size: 13px;
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      user-select: none;
+    }
+    .eq-section-title:hover { background: #e4ecf4; }
+    .eq-toggle { font-size: 11px; color: #888; transition: transform 0.2s; }
+    .eq-section.collapsed .eq-section-body { display: none; }
+    .eq-section.collapsed .eq-toggle { transform: rotate(-90deg); }
+    .eq-section-body { padding: 0; }
+    .eq-row {
+      display: grid; grid-template-columns: 2fr 2fr 1fr 0.5fr;
+      padding: 5px 14px; font-size: 11px; border-bottom: 1px solid #eee;
+      align-items: center;
+    }
+    .eq-row:last-child { border-bottom: none; }
+    .eq-row-header { font-weight: 600; color: #555; background: #fafafa; }
+    .eq-formula { font-size: 10px; color: #666; overflow-x: auto; }
+    .eq-val { font-weight: 600; color: #0074c1; text-align: right; padding-right: 8px; }
+    .eq-unit { color: #888; font-size: 10px; }
+    .eq-subheader {
+      font-weight: 600; font-size: 11px; padding: 8px 10px 4px;
+      color: #444; border-bottom: 1px solid #d0d0d0; margin-top: 2px; background: #f0f4f8;
+    }
+    .eq-violated { background: #fff3f3; }
+    .eq-violated .eq-val { color: #cc0000 !important; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <div class="top-left">
+      <div class="brand">
+        <div class="brand-logo"></div>
+        <span>UAM‑ECS</span>
+      </div>
+      <nav class="top-menu">
+        <!-- Language -->
+        <div class="menu-item" id="langMenu">
+          <span class="menu-label">English ▾</span>
+          <div class="dropdown" id="langDropdown">
+            <div class="dropdown-item" data-lang="en">English</div>
+            <div class="dropdown-item" data-lang="fr">French</div>
+            <div class="dropdown-item" data-lang="de">German</div>
+            <div class="dropdown-item" data-lang="hi">Hindi</div>
+            <div class="dropdown-item" data-lang="zh">Mandarin Chinese</div>
+            <div class="dropdown-item" data-lang="es">Spanish</div>
+          </div>
+        </div>
+
+        <!-- Simulation -->
+        <div class="menu-item" id="simMenu">
+          <span class="menu-label">Simulation ▾</span>
+          <div class="dropdown" id="simDropdown">
+            <div class="dropdown-item" id="aboutItem">About</div>
+          </div>
+        </div>
+
+        <!-- Graphs -->
+        <div class="menu-item" id="graphsMenu">
+          <span class="menu-label">Graphs ▾</span>
+          <div class="dropdown" id="graphsDropdown">
+            <div class="dropdown-item" data-graph="annualEnvCost">
+              Total Annual Costs <span class="dropdown-tick" data-tick="annualEnvCost">✓</span>
+            </div>
+            <div class="dropdown-item" data-graph="envCostPerRoute">
+              Environmental Cost per Delivery Route (daily) <span class="dropdown-tick" data-tick="envCostPerRoute">✓</span>
+            </div>
+            <div class="dropdown-item" data-graph="extBreakdown">
+              Environmental Externality Breakdown per Route‑Day <span class="dropdown-tick" data-tick="extBreakdown"></span>
+            </div>
+            <div class="dropdown-item" data-graph="embodiedDonut">
+              Drone Embodied Carbon (Cradle‑to‑Gate) <span class="dropdown-tick" data-tick="embodiedDonut"></span>
+            </div>
+            <div class="dropdown-item" data-graph="dailyEnvCost">
+              Economic Operational Cost per Delivery Route (daily) <span class="dropdown-tick" data-tick="dailyEnvCost"></span>
+            </div>
+            <div class="dropdown-item" data-graph="routeCompletion">
+              Route Costs (2027) <span class="dropdown-tick" data-tick="routeCompletion"></span>
+            </div>
+            <div class="dropdown-item" data-graph="capexPerRoute">
+              Economic (CAPEX) Cost per Delivery Route <span class="dropdown-tick" data-tick="capexPerRoute"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Equations -->
+        <div class="menu-item" id="eqMenu">
+          <span class="menu-label" onclick="toggleEquationsPage()">Equations</span>
+        </div>
+
+        <!-- Help -->
+        <div class="menu-item" id="helpMenu">
+          <span class="menu-label">Help ▾</span>
+          <div class="dropdown" id="helpDropdown">
+            <div class="dropdown-item" id="reportIssueItem">Report an Issue</div>
+          </div>
+        </div>
+      </nav>
+    </div>
+
+    <div class="top-right">
+      <button id="undoBtn" class="icon-btn" title="Undo" disabled>⟲</button>
+      <button id="redoBtn" class="icon-btn" title="Redo" disabled>⟳</button>
+      <button id="shareBtn" class="primary-btn">Share Scenario</button>
+    </div>
+  </header>
+
+  <!-- Share dropdown -->
+  <div id="shareDropdown" class="share-dropdown">
+    <div class="share-dropdown-label">Share this scenario by email</div>
+    <div class="share-input-row">
+      <input id="shareEmail" type="email" placeholder="name@example.com" />
+      <button id="shareSend" class="share-send-btn" title="Send">➤</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Email Sent!</div>
+
+  <main class="main">
+    <section class="top-panels">
+      <!-- Left graph panel -->
+      <article class="panel" id="panel-left">
+        <div class="panel-header" data-panel="left">
+          <span>
+            <span class="collapse-icon" data-panel-arrow="left">▼</span>
+            <span id="leftTitle">Annual Environmental Cost</span>
+          </span>
+          <span>⋮</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-area" id="leftChart">
+            <svg class="chart-grid"></svg>
+            <div class="chart-x-axis" id="leftXAxis">Year</div>
+            <div class="chart-y-axis" id="leftYAxis">Megawatt‑hours / year</div>
+            <div class="chart-ticks x" id="leftXTicks"></div>
+            <div class="chart-ticks y" id="leftYTicks"></div>
+          </div>
+          <div class="chart-footer" id="leftLegend">
+            <div class="badge badge-baseline">BASELINE (GROUND DELIVERY VAN)</div>
+            <div class="badge badge-current">DRONE DELIVERIES</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Right graph panel -->
+      <article class="panel" id="panel-right">
+        <div class="panel-header" data-panel="right">
+          <span>
+            <span class="collapse-icon" data-panel-arrow="right">▼</span>
+            <span id="rightTitle">Environmental Cost per Delivery Route (daily cost)</span>
+          </span>
+          <span>⋮</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-area" id="rightChart">
+            <svg class="chart-grid"></svg>
+            <div class="chart-x-axis" id="rightXAxis">Year</div>
+            <div class="chart-y-axis" id="rightYAxis">Tonnes CO₂‑eq / year</div>
+            <div class="chart-ticks x" id="rightXTicks"></div>
+            <div class="chart-ticks y" id="rightYTicks"></div>
+          </div>
+          <div class="chart-footer" id="rightLegend">
+            <div class="badge badge-baseline">BASELINE (GROUND DELIVERY VAN)</div>
+            <div class="badge badge-current">DRONE DELIVERIES</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- KPI panel -->
+      <aside class="panel temperature-panel">
+        <div>
+          <div id="headlineTonnes" style="display:none;">
+            <div class="temp-big" id="tempBigTonnes">+£0.00</div>
+            <div class="temp-small" id="tempSmallTonnes">of economic costs by switching the delivery route to a drone fleet in 2027</div>
+          </div>
+          <div id="headlineCost">
+            <div class="temp-big" id="tempBigCost">+£0.00</div>
+            <div class="temp-small" id="tempSmallCost">of environmental costs by switching the delivery route to a drone fleet in 2027</div>
+          </div>
+          <div class="env-cost-toggle">
+            <button id="toggleTonnes">Show the economic cost in £</button>
+            <span style="display:inline-block;width:16px;"></span>
+            <button id="toggleCost" class="active">Show the environmental cost in £</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- First row of parameters -->
+<section class="slider-grid">
+
+  <div class="slider-group">
+    <div class="slider-group-title"><b>Route Scenario Parameters</b></div>
+    <div class="slider-row" data-param="numNodes" data-min="50" data-max="500">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Number of delivery nodes</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="50" max="500" value="180" id="numNodesSlider" />
+        <div class="slider-status" id="numNodesLabel">180</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="latSep" data-min="10" data-max="200">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Lateral separation (in-air)</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="10" max="200" value="50" id="latSepSlider" />
+        <div class="slider-status" id="latSepLabel">50 m</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="parcelDropH" data-min="0" data-max="20">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Parcel drop height</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="20" value="4" id="parcelDropHSlider" />
+        <div class="slider-status" id="parcelDropHLabel">4 m</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="parcelDropT" data-min="10" data-max="120">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Time for parcel drop</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="10" max="120" value="30" id="parcelDropTSlider" />
+        <div class="slider-status" id="parcelDropTLabel">30 s</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="batSwapT" data-min="0" data-max="600">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Time for battery swap</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="600" value="300" id="batSwapTSlider" />
+        <div class="slider-status" id="batSwapTLabel">300 s</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="payloadSwapT" data-min="0" data-max="600">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Time for payload swap</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="600" value="300" id="payloadSwapTSlider" />
+        <div class="slider-status" id="payloadSwapTLabel">300 s</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="opHours" data-min="1" data-max="24">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Operating hours per day</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="1" max="24" value="24" id="opHoursSlider" />
+        <div class="slider-status" id="opHoursLabel">24 hrs</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slider-group">
+    <div class="slider-group-title"><b>Drone Parameters</b></div>
+    <div class="slider-row" data-param="parcelMass" data-min="0.5" data-max="5">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Parcel mass</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0.5" max="5" value="2.27" step="0.01" id="parcelMassSlider" />
+        <div class="slider-status" id="parcelMassLabel">2.27 kg</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="rotorDiam" data-min="0.2" data-max="1.5">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Rotor diameter</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0.2" max="1.5" value="0.6" step="0.01" id="rotorDiamSlider" />
+        <div class="slider-status" id="rotorDiamLabel">0.60 m</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="numRotors" data-min="2" data-max="12">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Number of drone rotors</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="2" max="12" value="6" id="numRotorsSlider" />
+        <div class="slider-status" id="numRotorsLabel">6</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="cruiseSpeed" data-min="5" data-max="50">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Cruise speed</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="5" max="50" value="30" id="cruiseSpeedSlider" />
+        <div class="slider-status" id="cruiseSpeedLabel">30 m/s</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="altitude" data-min="50" data-max="300">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Altitude in flight</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="50" max="300" value="120" id="altitudeSlider" />
+        <div class="slider-status" id="altitudeLabel">120 m</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slider-group">
+    <div class="slider-group-title"><b>Vertiport Parameters</b></div>
+    <div class="slider-row" data-param="greenfield" data-min="0" data-max="1">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Greenfield land fraction</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="1" value="0.2" step="0.01" id="greenfieldSlider" />
+        <div class="slider-status" id="greenfieldLabel">0.20</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="ecoCost" data-min="0" data-max="50">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Cost of ecology loss on greenfield</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="50" value="12.5" step="0.1" id="ecoCostSlider" />
+        <div class="slider-status" id="ecoCostLabel">12.5 £/m²</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="droneUnitCost" data-min="500" data-max="20000">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Drone unit cost</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="500" max="20000" value="4000" id="droneUnitCostSlider" />
+        <div class="slider-status" id="droneUnitCostLabel">4000 £</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="batteryUnitCost" data-min="100" data-max="3000">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Battery unit cost</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="100" max="3000" value="600" id="batteryUnitCostSlider" />
+        <div class="slider-status" id="batteryUnitCostLabel">600 £</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="vertiportCapex" data-min="100000" data-max="5000000">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Vertiport CAPEX</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="100000" max="5000000" value="500000" id="vertiportCapexSlider" />
+        <div class="slider-status" id="vertiportCapexLabel">500000 £</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="vertiportOpex" data-min="50000" data-max="500000">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Vertiport OPEX (annual)</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="50000" max="500000" value="200000" id="vertiportOpexSlider" />
+        <div class="slider-status" id="vertiportOpexLabel">200000 £/yr</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="analysisPeriod" data-min="5" data-max="40">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Analysis period</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="5" max="40" value="23" id="analysisPeriodSlider" />
+        <div class="slider-status" id="analysisPeriodLabel">23 yrs</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+    <!-- Second row of parameters -->
+<section class="slider-grid">
+
+  <div class="slider-group">
+    <div class="slider-group-title"><b>Embodied Carbon</b></div>
+  </div>
+
+  <div class="slider-group">
+    <div class="slider-group-title"><b>Ground Delivery Van Parameters</b></div>
+    <div class="slider-row" data-param="driverSalary" data-min="15000" data-max="60000">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Delivery driver salary</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="15000" max="60000" value="37430" id="driverSalarySlider" />
+        <div class="slider-status" id="driverSalaryLabel">37430 £/yr</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="congCost" data-min="0" data-max="3">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">UKTAG congestion cost</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="3" value="1.225" step="0.001" id="congCostSlider" />
+        <div class="slider-status" id="congCostLabel">1.225 £/veh-km</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="vanSpeed" data-min="5" data-max="30">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Van cruise speed</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="5" max="30" value="11.18" step="0.01" id="vanSpeedSlider" />
+        <div class="slider-status" id="vanSpeedLabel">11.18 m/s</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="vanParcels" data-min="50" data-max="500">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Number of parcels in van</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="50" max="500" value="180" id="vanParcelsSlider" />
+        <div class="slider-status" id="vanParcelsLabel">180</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="bhhConst" data-min="0.3" data-max="1.0">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">BHH constant</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0.3" max="1.0" value="0.57" step="0.01" id="bhhConstSlider" />
+        <div class="slider-status" id="bhhConstLabel">0.57</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="depotDist" data-min="1" data-max="20">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Distance depot to cluster</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="1" max="20" value="5" id="depotDistSlider" />
+        <div class="slider-status" id="depotDistLabel">5 km</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="vanRadius" data-min="1" data-max="50">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Operational radius of van</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="1" max="50" value="10" id="vanRadiusSlider" />
+        <div class="slider-status" id="vanRadiusLabel">10 km</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slider-group">
+    <div class="slider-group-title"><b>Other Parameters</b></div>
+    <!-- Gravity (9.81 m/s²) and Air density (1.225 kg/m³) are physical constants, kept as hidden inputs -->
+    <input type="hidden" value="9.81" id="gravitySlider" />
+    <input type="hidden" value="1.225" id="airDensitySlider" />
+    <div class="slider-row" data-param="gridCI" data-min="0.05" data-max="0.5">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Grid carbon intensity</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0.05" max="0.5" value="0.233" step="0.001" id="gridCISlider" />
+        <div class="slider-status" id="gridCILabel">0.233</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="elecPrice" data-min="0.05" data-max="0.50">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Electricity price</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0.05" max="0.50" value="0.28" step="0.001" id="elecPriceSlider" />
+        <div class="slider-status" id="elecPriceLabel">0.28 £/kWh</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="greenTariff" data-min="0.05" data-max="0.80">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Green energy tariff</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0.05" max="0.80" value="0.322" step="0.001" id="greenTariffSlider" />
+        <div class="slider-status" id="greenTariffLabel">0.322 £/kWh</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="greenFrac" data-min="0" data-max="1">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Green energy fraction</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="1" value="0" step="0.01" id="greenFracSlider" />
+        <div class="slider-status" id="greenFracLabel">0</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="carbonPrice" data-min="0" data-max="0.5">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Carbon price</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="0.5" value="0.049" step="0.001" id="carbonPriceSlider" />
+        <div class="slider-status" id="carbonPriceLabel">0.049 £/kgCO₂</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="noiseExt" data-min="0" data-max="2">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Noise externality</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="2" value="0.003" step="0.001" id="noiseExtSlider" />
+        <div class="slider-status" id="noiseExtLabel">0.003 £/vkm</div>
+      </div>
+    </div>
+    <div class="slider-row" data-param="timeValue" data-min="0" data-max="5">
+      <div class="slider-label-wrapper">
+        <span class="slider-label">Time value</span>
+        <button class="info-btn">⋯</button>
+      </div>
+      <div class="slider-wrapper">
+        <input type="range" min="0" max="5" value="0.17" step="0.01" id="timeValueSlider" />
+        <div class="slider-status" id="timeValueLabel">0.17 £/parcel-hr</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+    <div class="bottom-brand">
+      <button class="secondary-btn" id="thesisBtn"
+              onclick="window.open('https://www.researchgate.net/profile/Jasmine-Brittan-2','_blank')">
+        Click here to view the thesis work
+      </button>
+      <a class="bottom-link" href="https://mobility.mit.edu/people/jasmine-brittan/" target="_blank" rel="noopener noreferrer">
+        MIT JTL‑Urban Mobility Lab
+      </a>
+      <span>|</span>
+      <a class="bottom-link" href="https://engineering.nyu.edu/academics/programs/transportation-systems-ms"
+         target="_blank" rel="noopener noreferrer">
+        New York University
+      </a>
+      <span>|</span>
+      <a class="bottom-link" href="https://www.linkedin.com/in/jasmine-brittan/" target="_blank" rel="noopener noreferrer">
+        Jasmine Brittan
+      </a>
+    </div>
+  </main>
+
+
+  <!-- Equations page (outside main so it shows when main is hidden) -->
+  <div id="equationsPage">
+    <button class="eq-back-btn" onclick="toggleEquationsPage()">&#8592; Back to Simulator</button>
+    <div class="eq-page-title">Model Equations Outputs</div>
+    <div class="eq-page-subtitle">Values turn red when a constraint (C1\u2013C8) is violated. See methodology chapter \u00A7Constraints.</div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Zone Geometry</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Zone area (total)</div><div class="eq-formula" data-latex="A_{total} = \pi r_o^2"></div><div class="eq-val" id="eq_Atotal"></div><div class="eq-unit">km²</div></div>
+        <div class="eq-row"><div>Average inter-nodal distance</div><div class="eq-formula" data-latex="d_{avg} = \tfrac{2}{3}\sqrt{A/\pi}"></div><div class="eq-val" id="eq_davg"></div><div class="eq-unit">km</div></div>
+        <div class="eq-row"><div>Number of zones</div><div class="eq-formula" data-latex="N_z = 1"></div><div class="eq-val" id="eq_Nz"></div><div class="eq-unit">-</div></div>
+        <div class="eq-row"><div>Parcels per zone</div><div class="eq-formula" data-latex="n_z = N_N"></div><div class="eq-val" id="eq_nz"></div><div class="eq-unit">-</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Van Physics (3-phase)</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Avg start/stop speed</div><div class="eq-formula" data-latex="v_{st} = (v_c + u)/2"></div><div class="eq-val" id="eq_vst"></div><div class="eq-unit">m/s</div></div>
+        <div class="eq-row"><div>Acceleration (start)</div><div class="eq-formula" data-latex="a_{acc} = (v_c - u)/t_{st}"></div><div class="eq-val" id="eq_aacc"></div><div class="eq-unit">m/s²</div></div>
+        <div class="eq-row"><div>Deceleration (stop)</div><div class="eq-formula" data-latex="a_{dec} = (v_c - u)/t_{stop}"></div><div class="eq-val" id="eq_adec"></div><div class="eq-unit">m/s²</div></div>
+        <div class="eq-row"><div>Van frontal area</div><div class="eq-formula" data-latex="A_f = k_{shape}\cdot w_v\cdot h_v"></div><div class="eq-val" id="eq_Afvan"></div><div class="eq-unit">m²</div></div>
+        <div class="eq-row"><div>Start power</div><div class="eq-formula" data-latex="P_{st} = ((m a + \tfrac{1}{2}\rho C_D A v_{st}^2 + \mu m g) v_{st})/\eta_d"></div><div class="eq-val" id="eq_Pst"></div><div class="eq-unit">W</div></div>
+        <div class="eq-row"><div>Cruise power</div><div class="eq-formula" data-latex="P_c = ((\mu m g + \tfrac{1}{2}\rho C_D A v_c^2) v_c)/\eta_d + P_{aux}"></div><div class="eq-val" id="eq_Pcvan"></div><div class="eq-unit">W</div></div>
+        <div class="eq-row"><div>Stop power (regen)</div><div class="eq-formula" data-latex="P_{stop} = ((m a - \mu m g - \tfrac{1}{2}\rho C_D A v_{st}^2) v_{st}\eta_r)"></div><div class="eq-val" id="eq_Pstop"></div><div class="eq-unit">W</div></div>
+        <div class="eq-row"><div>Van route distance (BHH)</div><div class="eq-formula" data-latex="L_n = \tfrac{2 r_{bar} N_N}{p} + k\sqrt{N_N A}"></div><div class="eq-val" id="eq_Ln"></div><div class="eq-unit">km</div></div>
+        <div class="eq-row"><div>Daily van energy</div><div class="eq-formula" data-latex="E_{td} = (E_{st} + E_c - E_{stop})\cdot N_N"></div><div class="eq-val" id="eq_Etd"></div><div class="eq-unit">Wh</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Van Environmental Costs</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Energy emissions cost</div><div class="eq-formula" data-latex="ec_{energy} = (E_{td}/1000)\cdot CI_0\cdot c_{carbon}"></div><div class="eq-val" id="eq_ecenergyv"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Congestion cost</div><div class="eq-formula" data-latex="ec_{cong} = c_{cong}\cdot L_n"></div><div class="eq-val" id="eq_eccong"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>PM2.5/PM10 cost</div><div class="eq-formula" data-latex="ec_{PM} = pm_{g,km}\cdot L_n\cdot c_{PM25}/10^6"></div><div class="eq-val" id="eq_ecPM"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Noise cost</div><div class="eq-formula" data-latex="ec_{noise} = c_{noise}\cdot L_n"></div><div class="eq-val" id="eq_ecnoisev"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Tyre wear cost</div><div class="eq-formula" data-latex="ec_{tyre} = R_t\cdot m_t\cdot C_t\cdot c_{carbon}"></div><div class="eq-val" id="eq_ectyre"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Brake wear cost</div><div class="eq-formula" data-latex="ec_{brake} = R_{br}\cdot m_{br}\cdot C_{br}\cdot c_{carbon}"></div><div class="eq-val" id="eq_ecbrake"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Battery replacement cost</div><div class="eq-formula" data-latex="ec_{bat} = R_b\cdot m_b\cdot C_b\cdot c_{carbon}"></div><div class="eq-val" id="eq_ecbatv"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Total van environmental</div><div class="eq-formula" data-latex="van_{env} = \sum ec_i"></div><div class="eq-val" id="eq_vanenv"></div><div class="eq-unit">£/day</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Van OPEX</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Electricity cost</div><div class="eq-formula" data-latex="C_{elec} = (E_{td}/1000)\cdot c_e"></div><div class="eq-val" id="eq_Celecv"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Tyre replacement cost</div><div class="eq-formula" data-latex="C_{tyr} = R_t\cdot c_{tyr}"></div><div class="eq-val" id="eq_Ctyr"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Brake pad cost</div><div class="eq-formula" data-latex="C_{br} = (L_n/br_{vl}/8)\cdot c_{br}"></div><div class="eq-val" id="eq_Cbr"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Battery OPEX</div><div class="eq-formula" data-latex="C_{bat} = R_b\cdot c_{bv,unit}"></div><div class="eq-val" id="eq_Cbatv"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Driver salary/day</div><div class="eq-formula" data-latex="C_{ds} = c_{ds}/260"></div><div class="eq-val" id="eq_Cds"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Waiting time cost</div><div class="eq-formula" data-latex="C_{wait} = N_N v_t L_n/(2 v_c\cdot 3.6)"></div><div class="eq-val" id="eq_Cwaitv"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Van total cost</div><div class="eq-formula" data-latex="van_{total} = van_{env}+van_{opex}"></div><div class="eq-val" id="eq_vantotal"></div><div class="eq-unit">£/day</div></div>
+        <div class="eq-row"><div>Van cost per parcel</div><div class="eq-formula" data-latex="van_{pp} = van_{total}/N_N"></div><div class="eq-val" id="eq_vanpp"></div><div class="eq-unit">£/parcel</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Drone Physics</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Drone weight</div><div class="eq-formula" data-latex="W_d = m_d g"></div><div class="eq-val" id="eq_Wd"></div><div class="eq-unit">N</div></div>
+        <div class="eq-row"><div>Rotor disk area</div><div class="eq-formula" data-latex="A_{disk} = N_r\pi(d_r/2)^2"></div><div class="eq-val" id="eq_Adisk"></div><div class="eq-unit">m²</div></div>
+        <div class="eq-row"><div>Hover power</div><div class="eq-formula" data-latex="P_h = (W_d)^{1.5}/(\eta_b\sqrt{2\rho A_{disk}})"></div><div class="eq-val" id="eq_Ph"></div><div class="eq-unit">W</div></div>
+        <div class="eq-row"><div>Wing area (×2)</div><div class="eq-formula" data-latex="A_w = 2 l_w w_w"></div><div class="eq-val" id="eq_Aw"></div><div class="eq-unit">m²</div></div>
+        <div class="eq-row"><div>Drone frontal area</div><div class="eq-formula" data-latex="A_{front} = l_d\cdot w_d"></div><div class="eq-val" id="eq_Afront"></div><div class="eq-unit">m²</div></div>
+        <div class="eq-row"><div>Ascending speed</div><div class="eq-formula" data-latex="v_a = (P_a - P_h)\eta_b/W_d"></div><div class="eq-val" id="eq_va"></div><div class="eq-unit">m/s</div></div>
+        <div class="eq-row"><div>Descending speed</div><div class="eq-formula" data-latex="v_d = (P_h - P_d)\eta_b/W_d"></div><div class="eq-val" id="eq_vd"></div><div class="eq-unit">m/s</div></div>
+        <div class="eq-row"><div>Cruise power</div><div class="eq-formula" data-latex="P_c = P_h(T_{tot}/W_d)^{1.5} + (D_{aero} v_c)/\eta_b"></div><div class="eq-val" id="eq_Pc"></div><div class="eq-unit">W</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Drone Trip Timing</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>t_a1 (ascend to alt)</div><div class="eq-formula" data-latex="t_{a,1} = h_{alt}/v_a"></div><div class="eq-val" id="eq_ta1"></div><div class="eq-unit">s</div></div>
+        <div class="eq-row"><div>t_c1 (cruise leg 1)</div><div class="eq-formula" data-latex="t_{c,1} = d_{avg,m}/v_c"></div><div class="eq-val" id="eq_tc1"></div><div class="eq-unit">s</div></div>
+        <div class="eq-row"><div>t_d1 (descend to drop)</div><div class="eq-formula" data-latex="t_{d,1} = (h_{alt}-h_p)/v_d"></div><div class="eq-val" id="eq_td1"></div><div class="eq-unit">s</div></div>
+        <div class="eq-row"><div>t_a2 (ascend back)</div><div class="eq-formula" data-latex="t_{a,2} = (h_{alt}-h_p)/v_a"></div><div class="eq-val" id="eq_ta2"></div><div class="eq-unit">s</div></div>
+        <div class="eq-row"><div>t_c2 (cruise leg 2)</div><div class="eq-formula" data-latex="t_{c,2} = d_{avg,m}/v_c"></div><div class="eq-val" id="eq_tc2"></div><div class="eq-unit">s</div></div>
+        <div class="eq-row"><div>t_d2 (land)</div><div class="eq-formula" data-latex="t_{d,2} = h_{alt}/v_d"></div><div class="eq-val" id="eq_td2"></div><div class="eq-unit">s</div></div>
+        <div class="eq-row"><div>Total trip time</div><div class="eq-formula" data-latex="t_t = \sum t_i + t_{p,1} + t_b + t_{p,2}"></div><div class="eq-val" id="eq_tt"></div><div class="eq-unit">s</div></div>
+        <div class="eq-row"><div>Flight+charge time</div><div class="eq-formula" data-latex="t_{fb} = t_t - t_{p,2}"></div><div class="eq-val" id="eq_tfb"></div><div class="eq-unit">s</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Drone Energy & Battery</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Vertical energy</div><div class="eq-formula" data-latex="E_{vert} = (P_a\cdot\Sigma t_a + P_d\cdot\Sigma t_d + P_h t_{p,1})/3600"></div><div class="eq-val" id="eq_Evert"></div><div class="eq-unit">Wh</div></div>
+        <div class="eq-row"><div>Cruise energy</div><div class="eq-formula" data-latex="E_{cruise} = P_c(t_{c,1}+t_{c,2})/3600"></div><div class="eq-val" id="eq_Ecd"></div><div class="eq-unit">Wh</div></div>
+        <div class="eq-row"><div>Trip energy</div><div class="eq-formula" data-latex="E_{trip} = E_{vert} + E_{cruise}"></div><div class="eq-val" id="eq_Etrip"></div><div class="eq-unit">Wh</div></div>
+        <div class="eq-row"><div>Grid energy per trip</div><div class="eq-formula" data-latex="E_{grid} = E_{trip}/(\eta_g\eta_c)"></div><div class="eq-val" id="eq_Egrid"></div><div class="eq-unit">Wh</div></div>
+        <div class="eq-row"><div>Battery energy</div><div class="eq-formula" data-latex="E_b = V_{nom}\cdot C_{bat}"></div><div class="eq-val" id="eq_Eb"></div><div class="eq-unit">Wh</div></div>
+        <div class="eq-row"><div>Usable energy</div><div class="eq-formula" data-latex="E_u = E_b\cdot \Delta SoC"></div><div class="eq-val" id="eq_Eu"></div><div class="eq-unit">Wh</div></div>
+        <div class="eq-row"><div>Trips per battery charge</div><div class="eq-formula" data-latex="N_{tc} = \lfloor E_u/E_{trip}\rfloor"></div><div class="eq-val" id="eq_Ntc"></div><div class="eq-unit">trips</div></div>
+        <div class="eq-row"><div>Charge time</div><div class="eq-formula" data-latex="t_{ch} = (E_b/(\eta_g\eta_c)\Delta SoC)/P_{ch}"></div><div class="eq-val" id="eq_tchd"></div><div class="eq-unit">hr</div></div>
+        <div class="eq-row"><div>Trips per drone per day</div><div class="eq-formula" data-latex="N_{trips} = N_h\cdot 3600/t_t"></div><div class="eq-val" id="eq_Ntrips"></div><div class="eq-unit">trips</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Fleet & Vertiport</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Fleet size</div><div class="eq-formula" data-latex="F = \lceil n_z/N_{trips}\rceil + s_{spare}"></div><div class="eq-val" id="eq_F"></div><div class="eq-unit">drones</div></div>
+        <div class="eq-row"><div>Battery count</div><div class="eq-formula" data-latex="N_b = \max(F, \lceil F\cdot t_{ch}/(N_{tc} t_{fb}/3600)\cdot r\rceil)"></div><div class="eq-val" id="eq_Nb"></div><div class="eq-unit">batteries</div></div>
+        <div class="eq-row"><div>Charges/day</div><div class="eq-formula" data-latex="N_{ch,day} = n_z/(N_b\cdot N_{tc})"></div><div class="eq-val" id="eq_Nchday"></div><div class="eq-unit">cycles/day</div></div>
+        <div class="eq-row"><div>Days until battery repl.</div><div class="eq-formula" data-latex="D_{rb} = N_{lc}/N_{ch,day}"></div><div class="eq-val" id="eq_Drb"></div><div class="eq-unit">days</div></div>
+        <div class="eq-row"><div>Battery repl./year</div><div class="eq-formula" data-latex="D_{rb,yr} = 365/D_{rb}"></div><div class="eq-val" id="eq_Drby"></div><div class="eq-unit">-</div></div>
+        <div class="eq-row"><div>Vertiport area/drone</div><div class="eq-formula" data-latex="A_{vd} = 2.5\cdot d_r"></div><div class="eq-val" id="eq_Avd"></div><div class="eq-unit">m²</div></div>
+        <div class="eq-row"><div>Vertiport greenfield area</div><div class="eq-formula" data-latex="A_v = F\cdot A_{vd}\cdot \lambda_g"></div><div class="eq-val" id="eq_Av"></div><div class="eq-unit">m²</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Drone Environmental Costs</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Energy emissions cost</div><div class="eq-formula" data-latex="c_{energy} = (E_d/1000)\cdot CI_{eff}\cdot c_{carbon}"></div><div class="eq-val" id="eq_cenergy"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Battery repl. cost</div><div class="eq-formula" data-latex="c_{rb,day} = D_{rb,day}\cdot C_b m_b\cdot c_{carbon}"></div><div class="eq-val" id="eq_crbd"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Rotor repl. cost</div><div class="eq-formula" data-latex="ec_{rd} = R_{rd}\cdot m_r C_r\cdot c_{carbon}"></div><div class="eq-val" id="eq_ecrd"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Motor repl. cost</div><div class="eq-formula" data-latex="ec_{md} = R_{md}\cdot m_m C_m\cdot c_{carbon}"></div><div class="eq-val" id="eq_ecmd"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Actuator repl. cost</div><div class="eq-formula" data-latex="ec_{dd} = R_{dd}\cdot m_d C_d\cdot c_{carbon}"></div><div class="eq-val" id="eq_ecdd"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Fleet embodied/day</div><div class="eq-formula" data-latex="ec_{fleet} = F\cdot c_{carbon}\Sigma C_i m_i/T_{days}"></div><div class="eq-val" id="eq_ecfleet"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Greenfield cost/day</div><div class="eq-formula" data-latex="ec_{green} = A_v\cdot c_{eco}/T_{days}"></div><div class="eq-val" id="eq_ecgreen"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Noise cost</div><div class="eq-formula" data-latex="ec_{noise,d} = n_z\cdot c_{noise,event}"></div><div class="eq-val" id="eq_ecnoised"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Total drone environmental</div><div class="eq-formula" data-latex="drone_{env} = \sum ec_i\cdot N_z"></div><div class="eq-val" id="eq_droneenv"></div><div class="eq-unit">£/day</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Drone OPEX</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Blended electricity price</div><div class="eq-formula" data-latex="c_{blend} = (1-p_g)c_e + p_g c_g"></div><div class="eq-val" id="eq_cblend"></div><div class="eq-unit">£/kWh</div></div>
+        <div class="eq-row"><div>Electricity cost</div><div class="eq-formula" data-latex="C_{elec,d} = (E_d/1000)\cdot c_{blend}"></div><div class="eq-val" id="eq_Celecd"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Battery replacement</div><div class="eq-formula" data-latex="C_{bat,rep} = D_{rb,day}\cdot F\cdot c_{b,unit}"></div><div class="eq-val" id="eq_Cbatrep"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Rotor replacement</div><div class="eq-formula" data-latex="C_{rot} = R_{rd}\cdot c_{r,unit}"></div><div class="eq-val" id="eq_Crot"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Motor replacement</div><div class="eq-formula" data-latex="C_{mot} = R_{md}\cdot c_{m,unit}"></div><div class="eq-val" id="eq_Cmot"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Actuator repl.</div><div class="eq-formula" data-latex="C_{pd} = R_{dd}\cdot c_{pd,unit}"></div><div class="eq-val" id="eq_Cpd"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Waiting time</div><div class="eq-formula" data-latex="C_{wait,d} = n_z v_t t_t/(2 F\cdot 3600)"></div><div class="eq-val" id="eq_Cwaitd"></div><div class="eq-unit">£</div></div>
+        <div class="eq-row"><div>Total drone OPEX</div><div class="eq-formula" data-latex="drone_{opex} = \sum C_i\cdot N_z"></div><div class="eq-val" id="eq_droneopex"></div><div class="eq-unit">£/day</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Drone CAPEX (amortised)</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Fleet amortisation</div><div class="eq-formula" data-latex="C_{fleet} = F\cdot c_{d,unit}/T_{days}"></div><div class="eq-val" id="eq_Cfleet"></div><div class="eq-unit">£/day</div></div>
+        <div class="eq-row"><div>Battery amortisation</div><div class="eq-formula" data-latex="C_{batAmort} = N_b\cdot c_{b,unit}/T_{days}"></div><div class="eq-val" id="eq_CbatAmort"></div><div class="eq-unit">£/day</div></div>
+        <div class="eq-row"><div>Vertiport amortisation</div><div class="eq-formula" data-latex="C_{v,amort} = c_v/T_{days}"></div><div class="eq-val" id="eq_Cvamort"></div><div class="eq-unit">£/day</div></div>
+        <div class="eq-row"><div>Vertiport OPEX/day</div><div class="eq-formula" data-latex="C_{vo,day} = c_{vo}/365"></div><div class="eq-val" id="eq_Cvoday"></div><div class="eq-unit">£/day</div></div>
+        <div class="eq-row"><div>Total drone CAPEX</div><div class="eq-formula" data-latex="drone_{capex} = \sum C_i\cdot N_z"></div><div class="eq-val" id="eq_dronecapex"></div><div class="eq-unit">£/day</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Constraints (C1\u2013C8)</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row" id="eq_C1_row"><div>C1: Demand coverage</div><div class="eq-formula" data-latex="F\cdot N_{trips} \geq n_z"></div><div class="eq-val" id="eq_C1"></div><div class="eq-unit">ok/fail</div></div>
+        <div class="eq-row" id="eq_C2_row"><div>C2: Airspace separation</div><div class="eq-formula" data-latex="F \leq d_{avg}/d_{lat}"></div><div class="eq-val" id="eq_C2"></div><div class="eq-unit">ok/fail</div></div>
+        <div class="eq-row" id="eq_C3_row"><div>C3: Drone range</div><div class="eq-formula" data-latex="d_{avg} \leq 12\,km"></div><div class="eq-val" id="eq_C3"></div><div class="eq-unit">ok/fail</div></div>
+        <div class="eq-row" id="eq_C4_row"><div>C4: Battery capacity</div><div class="eq-formula" data-latex="E_{trip} \leq E_u"></div><div class="eq-val" id="eq_C4"></div><div class="eq-unit">ok/fail</div></div>
+        <div class="eq-row" id="eq_C5_row"><div>C5: Noise threshold</div><div class="eq-formula" data-latex="L_{cruise} \leq L_{thresh}"></div><div class="eq-val" id="eq_C5"></div><div class="eq-unit">ok/fail</div></div>
+        <div class="eq-row" id="eq_C6_row"><div>C6: Pad throughput</div><div class="eq-formula" data-latex="F_{land}/t_{pad} \leq N_{pad}"></div><div class="eq-val" id="eq_C6"></div><div class="eq-unit">ok/fail</div></div>
+        <div class="eq-row" id="eq_C7_row"><div>C7: Green fraction range</div><div class="eq-formula" data-latex="0 \leq p_g \leq 1"></div><div class="eq-val" id="eq_C7"></div><div class="eq-unit">ok/fail</div></div>
+        <div class="eq-row" id="eq_C8_row"><div>C8: Fleet non-zero</div><div class="eq-formula" data-latex="F \geq 1"></div><div class="eq-val" id="eq_C8"></div><div class="eq-unit">ok/fail</div></div>
+      </div>
+    </div>
+
+    <div class="eq-section">
+      <div class="eq-section-title" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>Summary (per-parcel)</span><span class="eq-toggle">\u25BC</span>
+      </div>
+      <div class="eq-section-body">
+        <div class="eq-row eq-row-header"><div>Equation</div><div>Formula</div><div>Value</div><div>Unit</div></div>
+        <div class="eq-row"><div>Van total per parcel</div><div class="eq-formula" data-latex="van_{pp} = van_{total}/N_N"></div><div class="eq-val" id="eq_sumVanPP"></div><div class="eq-unit">£/parcel</div></div>
+        <div class="eq-row"><div>Drone OPEX per parcel</div><div class="eq-formula" data-latex="drone_{opex,pp}"></div><div class="eq-val" id="eq_sumDroneOpexPP"></div><div class="eq-unit">£/parcel</div></div>
+        <div class="eq-row"><div>Drone full per parcel</div><div class="eq-formula" data-latex="drone_{full,pp}"></div><div class="eq-val" id="eq_sumDroneFullPP"></div><div class="eq-unit">£/parcel</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Parameter modal -->
+  <div id="paramModalOverlay" class="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" id="paramModalClose">✕</button>
+      <div class="modal-title" id="paramModalTitle">Parameter detail</div>
+      <div class="modal-body" id="paramModalBody">
+        Explanation of how this parameter is derived will go here.
+      </div>
+      <div class="modal-input-row">
+        <label for="paramModalInput">Specify value:</label>
+        <input id="paramModalInput" type="number" />
+        <button id="paramModalApply" class="primary-btn" style="padding:4px 8px;font-size:11px;">Apply</button>
+      </div>
+      <div class="modal-help" id="paramModalHelp"></div>
+      <div class="modal-error" id="paramModalError">Number is outside of the designated range!</div>
+    </div>
+  </div>
+
+  <!-- Issue modal -->
+  <div id="issueModalOverlay" class="modal-overlay">
+    <div class="modal">
+      <button class="modal-close" id="issueModalClose">✕</button>
+      <div class="modal-title">Report an Issue</div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-input-row">
+        <textarea id="issueText"></textarea>
+      </div>
+      <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:8px;">
+        <button id="issueSubmit" class="primary-btn" style="padding:4px 10px;font-size:11px;">Submit</button>
+      </div>
+      <div class="modal-help">Your email client may open if a mailto: handler is configured.</div>
+    </div>
+  </div>
+
+<!-- About modal -->
+<div id="aboutModal" class="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" id="aboutModalClose">✕</button>
+    <div class="modal-title" id="aboutModalTitle">About this simulator</div>
+    <div class="modal-body" id="aboutModalBody">
+      <p style="margin-bottom: 12px;">
+        Borne from the death of Ella Adoo-Kissi-Debrah, who was the first to have air pollution listed on her death certificate in 2020, it is widely evident that air pollution is becoming a crippling burden on society and a leading cause of poor health internationally. More specifically, within London, this issue is exemplified by persistent exceedances of WHO air quality guidelines, with transportation accounting for approximately 50% of NOx emissions and significant contributions to particulate matter pollution.
+      </p>
+      
+      <p style="margin-bottom: 12px;">
+        Given this dire societal burden, a new technology has originated to absorb network congestion attributed to e-commerce: unmanned aerial vehicles. By lifting portions of our transport network into the sky, links will be more freely available for the likes of public transport and passenger movements.
+      </p>
+      
+      <p style="margin-bottom: 12px;">
+        <strong>What is UAM-ECS?</strong><br/>
+        The Urban Air Mobility Environmental Cost Simulator (UAM-ECS) is an interactive decision tool designed to evaluate the environmental implications of introducing electric vertical take-off and landing (eVTOL) aircraft for urban logistic routes. This simulator enables urban planners, policymakers, and mobility operators to assess the holistic environmental costs—including greenhouse gas emissions, energy consumption, noise pollution, and land-use impacts—associated with UAM deployment compared to conventional ground-based delivery systems.
+      </p>
+      
+      <p style="margin-bottom: 12px;">
+        <strong>How does it work?</strong><br/>
+        UAM-ECS employs a parametric modelling approach that integrates real-world operational constraints and key parameters across various domains. Such examples encompass:
+      </p>
+      
+      <ul style="margin-left: 20px; margin-bottom: 12px;">
+        <li><strong>Route Scenario Parameters:</strong> Number of delivery nodes, nodal distances, parcel drop specifications, battery and payload swap times, and operating hours</li>
+        <li><strong>Drone Parameters:</strong> Drone mass, ascending/descending power, rotor and wing specifications, battery characteristics, and component lifespans</li>
+        <li><strong>Vertiport Parameters:</strong> Greenfield land fraction and ecology loss costs</li>
+        <li><strong>Embodied Carbon:</strong> Material-specific embodied carbon intensities and masses for steel, nylon, aluminium, magnesium, copper, carbon fibre, fibreglass, and batteries</li>
+        <li><strong>Ground Delivery Van Parameters:</strong> Van mass, battery capacity, driver costs, emissions factors, speed profiles, component lifespans, and route geometry</li>
+        <li><strong>Other Parameters:</strong> Physical constants, power conversion efficiencies, carbon costs, aerodynamic coefficients, and damage cost factors</li>
+      </ul>
+      
+      <p style="margin-bottom: 12px;">
+        The simulator calculates trip-level environmental impacts and extrapolates these across operational timescales (2026-2050) to visualize trajectories under different deployment scenarios. Environmental costs are expressed as monetized values (USD) using their respective social costs. The simulator stretches to 2050, in line with the Net Zero goals of the Paris Climate Agreement.
+      </p>
+      
+      <p style="margin-bottom: 12px;">
+        <strong>Research Foundation</strong><br/>
+        This tool is grounded in thesis research conducted at New York University's Tandon School of Engineering in collaboration with MIT's JTL-Urban Mobility Lab. The underlying methodology synthesiaes lifecycle assessment (LCA) frameworks and environmental economics to identify inflection points for which drone deployment becomes environmentally beneficial.
+      </p>
+      
+      <p style="margin-bottom: 12px;">
+        <strong>Intended Use</strong><br/>
+        UAM-ECS is designed for exploratory scenario analysis and educational purposes. It helps stakeholders understand trade-offs, identify critical parameters that drive environmental outcomes, and develop strategies for environmentally responsible UAM deployment. The tool encourages evidence-based discourse around emerging mobility technologies and their role in sustainable urban futures.
+      </p>
+      
+      <p style="margin-bottom: 8px;">
+        <strong>About the Developer</strong><br/>
+        Jasmine Brittan is an MS student in Transportation Systems, with a concentration in Mobility Systems Engineering. Her career thus far has embodied various internships within aerial mobility and transportation, including at the European Space Agency, NASA and ZF Automotive.
+      </p>
+      
+      <p style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #666;">
+        <em>Disclaimer: This simulator provides estimates based on literature-derived values. Actual environmental impacts will vary based on specific technologies, operational contexts, and local conditions. Users should validate findings with company contextual knowledge for specific deployment results.</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+  <script>
+    const sliders = Array.from(document.querySelectorAll('input[type="range"]'));
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+
+    let pastStates = [];
+    let futureStates = [];
+    let ignoreStatePush = false;
+    let initialState = null;
+    let currentState = null;
+
+    function captureState() {
+      const state = {};
+      sliders.forEach(s => { state[s.id] = s.value; });
+      return state;
+    }
+    function applyState(state) {
+      ignoreStatePush = true;
+      sliders.forEach(s => {
+        if (state[s.id] !== undefined) {
+          s.value = state[s.id];
+          updateLabelForSlider(s);
+        }
+      });
+      ignoreStatePush = false;
+      recalcHeadline();
+    }
+    function pushStateForUndo() {
+      if (ignoreStatePush) return;
+      const newState = captureState();
+      const stateChanged = !currentState || JSON.stringify(currentState) !== JSON.stringify(newState);
+      if (stateChanged) {
+        if (currentState) {
+          pastStates.push(currentState);
+        }
+        currentState = newState;
+        futureStates = [];
+        updateUndoRedoButtons();
+      }
+    }
+    function updateUndoRedoButtons() {
+      undoBtn.disabled = pastStates.length === 0;
+      redoBtn.disabled = futureStates.length === 0;
+    }
+
+    undoBtn.addEventListener('click', () => {
+      if (!pastStates.length) return;
+      if (currentState) {
+        futureStates.push(currentState);
+      }
+      const previous = pastStates.pop();
+      currentState = previous;
+      applyState(previous);
+      updateUndoRedoButtons();
+    });
+
+    redoBtn.addEventListener('click', () => {
+      if (!futureStates.length) return;
+      if (currentState) {
+        pastStates.push(currentState);
+      }
+      const next = futureStates.pop();
+      currentState = next;
+      applyState(next);
+      updateUndoRedoButtons();
+    });
+
+    // Unit map for auto-labelling sliders
+        const sliderUnits = {
+      numNodesSlider: '', latSepSlider: ' m', parcelDropHSlider: ' m',
+      parcelDropTSlider: ' s', batSwapTSlider: ' s', payloadSwapTSlider: ' s', opHoursSlider: ' hrs',
+      parcelMassSlider: ' kg', rotorDiamSlider: ' m',
+      numRotorsSlider: '', cruiseSpeedSlider: ' m/s', altitudeSlider: ' m',
+      greenfieldSlider: '', ecoCostSlider: ' \u00a3/m\u00b2',
+      droneUnitCostSlider: ' \u00a3', batteryUnitCostSlider: ' \u00a3',
+      vertiportCapexSlider: ' \u00a3', vertiportOpexSlider: ' \u00a3/yr',
+      analysisPeriodSlider: ' yrs',
+      driverSalarySlider: ' \u00a3/yr',
+      congCostSlider: ' \u00a3/veh-km',
+      vanSpeedSlider: ' m/s',
+      vanParcelsSlider: '', bhhConstSlider: '', depotDistSlider: ' km', vanRadiusSlider: ' km',
+      gridCISlider: ' kgCO\u2082/kWh',
+      elecPriceSlider: ' \u00a3/kWh', greenTariffSlider: ' \u00a3/kWh',
+      greenFracSlider: '', carbonPriceSlider: ' \u00a3/kgCO\u2082',
+      noiseExtSlider: ' \u00a3/vkm', timeValueSlider: ' \u00a3/parcel-hr'
+    };
+
+    function updateLabelForSlider(slider) {
+      const labelSpan = document.getElementById(slider.id.replace('Slider', 'Label'));
+      if (!labelSpan) return;
+      const v = parseFloat(slider.value);
+      const step = parseFloat(slider.step) || 1;
+      const unit = sliderUnits[slider.id] || '';
+      // Format: use enough decimals to match the step
+      let formatted;
+      if (step < 0.001) formatted = v.toFixed(4);
+      else if (step < 0.01) formatted = v.toFixed(3);
+      else if (step < 0.1) formatted = v.toFixed(2);
+      else if (step < 1) formatted = v.toFixed(1);
+      else formatted = String(Math.round(v));
+      labelSpan.textContent = formatted + unit;
+    }
+
+    sliders.forEach(slider => {
+      updateLabelForSlider(slider);
+      slider.addEventListener('input', () => {
+        updateLabelForSlider(slider);
+        recalcHeadline();
+      });
+      slider.addEventListener('change', () => {
+        pushStateForUndo();
+      });
+    });
+
+    // <!-- Impact & Environmental Cost Calculations -->
+    function sv(id) {
+      var el = document.getElementById(id);
+      if (!el) return 0;
+      var v = parseFloat(el.value);
+      return isNaN(v) ? 0 : v;
+    }
+
+    function recalcHeadline() {
+      function sv(id) {
+        var el = document.getElementById(id);
+        return el ? parseFloat(el.value) : 0;
+      }
+
+      // === HARDCODED CONSTANTS (thesis v32) ===
+      var g = 9.81, rho = 1.225;
+      var eta_g = 0.92, eta_c = 0.9, eta_b = 0.7, eta_d = 1.0, eta_r = 0.6;
+      var t_h = 3600;
+      var DAYS_YR = 365;
+      var m_airframe = 35.53;
+      var P_a = 8000, P_d = 4004;
+      var l_d = 0.3, w_d = 0.3;
+      var l_w = 1.68, w_w = 0.09;
+      var V_nom = 44.4, C_bat = 30;
+      var P_ch = 1850;
+      var dSoC = 0.8;
+      var N_lc = 1500;
+      var r_l = 250, m_l = 750, pd_l = 75000;
+      var s_spare = 1;
+      var C_L = 0.3, C_D_drone = 0.3;
+      var C_S=2.45, m_S=1, C_NP=9.14, m_NP=1.5, C_Al=13.1, m_Al=3;
+      var C_Mg=41.26, m_Mg=0.3, C_Cu=3.81, m_Cu=2.5;
+      var C_CF=35, m_CF=8.5, C_Gl=8.1, m_Gl=2.5;
+      var C_b_mat=14, m_b_mat=12;
+      var C_r_mat=24, m_r_mat=0.2;
+      var C_m_mat=8, m_m_mat=0.45;
+      var C_d_mat=4.5, m_d_mat=0.1;
+      var c_r_unit = 120, c_m_unit = 350, c_pd_unit = 80;
+      var m_v = 4250;
+      var w_v = 2.02, h_v = 2.356, k_shape = 0.84;
+      var C_D_van = 0.3, mu_RR = 0.012;
+      var P_aux = 3000;
+      var t_st = 10, t_stop = 10;
+      var u_init = 0;
+      var b_vl = 160000, t_vl = 40000, br_vl = 100000;
+      var m_t_van = 13, m_br_van = 0.7, m_b_van = 400;
+      var C_t_van = 2.82, C_br_van = 2.19, C_b_van = 14;
+      var c_bv_unit = 18000, c_t_van_cost = 150, c_br_van_cost = 200;
+      var N_ax = 2, N_pads = 8, N_tyres = 4;
+      var LF_st = 1, LF_end = 0.02;
+      var EF_TSP_b_c = 0.0142, EF_TSP_t_c = 0.0107;
+      var EF_tsp_r_hd = 0.076, EF_r_25 = 0.0205;
+      var phi_pm = 0.506, f_friction = 0.17;
+      var c_PM25 = 114411;
+      var redundancy = 1.2;
+      var A_vd_factor = 2.5;
+      var L_cruise = 63.7, L_vert = 90, L_van = 75, L_thresh = 65;
+
+      // === USER-ADJUSTABLE ===
+      var N_N = sv('numNodesSlider');
+      var r_o = sv('vanRadiusSlider');
+      var r_bar = sv('depotDistSlider');
+      var N_h = sv('opHoursSlider');
+      var d_lat = sv('latSepSlider');
+      var m_p = sv('parcelMassSlider');
+      var v_c_d = sv('cruiseSpeedSlider');
+      var h_alt = sv('altitudeSlider');
+      var d_r_val = sv('rotorDiamSlider');
+      var N_r_val = sv('numRotorsSlider');
+      var h_p = sv('parcelDropHSlider');
+      var t_p1 = sv('parcelDropTSlider');
+      var t_b = sv('batSwapTSlider');
+      var t_p2 = sv('payloadSwapTSlider');
+      var c_d_unit = sv('droneUnitCostSlider');
+      var c_b_unit = sv('batteryUnitCostSlider');
+      var c_v_capex = sv('vertiportCapexSlider');
+      var c_vo = sv('vertiportOpexSlider');
+      var lambda_g = sv('greenfieldSlider');
+      var c_eco_v = sv('ecoCostSlider');
+      var T_yr_val = sv('analysisPeriodSlider');
+      var v_c_v = sv('vanSpeedSlider');
+      var p_parcels = sv('vanParcelsSlider');
+      var k_bhh = sv('bhhConstSlider');
+      var c_ds = sv('driverSalarySlider');
+      var c_e = sv('elecPriceSlider');
+      var c_g = sv('greenTariffSlider');
+      var p_g = sv('greenFracSlider');
+      var c_carbon = sv('carbonPriceSlider');
+      var CI_0 = sv('gridCISlider');
+      var c_cong = sv('congCostSlider');
+      var c_noise_vkm = sv('noiseExtSlider');
+      var v_t = sv('timeValueSlider');
+
+      var m_d = m_airframe + m_p;
+      var T_days = T_yr_val * DAYS_YR;
+
+      // === ZONE GEOMETRY ===
+      var A_total = Math.PI * r_o * r_o;
+      var A = A_total;
+      var N_z = 1.0;
+      var n_z = N_N;
+      var d_avg_km = (2/3) * Math.sqrt(A / Math.PI);
+      var d_avg_m = d_avg_km * 1000;
+
+      // === VAN PHYSICS ===
+      var L_n = (2 * r_bar * N_N) / Math.max(p_parcels, 1) + k_bhh * Math.sqrt(N_N * A_total);
+      var d_ij_van_km = L_n / Math.max(N_N, 1);
+      var A_f_van = k_shape * w_v * h_v;
+      var v_avg = (v_c_v + u_init) / 2;
+      var a_acc = (v_c_v - u_init) / Math.max(t_st, 0.01);
+      var a_dec = (v_c_v - u_init) / Math.max(t_stop, 0.01);
+      var P_st_v = ((m_v * a_acc + 0.5 * rho * C_D_van * A_f_van * v_avg*v_avg + mu_RR * m_v * g) * v_avg) / eta_d;
+      var P_c_van = ((mu_RR * m_v * g + 0.5 * rho * C_D_van * A_f_van * v_c_v*v_c_v) * v_c_v) / eta_d + P_aux;
+      var P_stop_v = ((m_v * a_dec - mu_RR * m_v * g - 0.5 * rho * C_D_van * A_f_van * v_avg*v_avg) * v_avg * eta_r);
+      var t_c_van = (d_ij_van_km * 1000) / Math.max(v_c_v, 0.01);
+      var E_st_v = P_st_v * t_st / 3600;
+      var E_c_v = P_c_van * t_c_van / 3600;
+      var E_stop_v = P_stop_v * t_stop / 3600;
+      var E_td_van = (E_st_v + E_c_v - E_stop_v) * N_N;
+
+      // === VAN EMISSIONS FACTORS ===
+      var LF = (LF_st + LF_end) / 2;
+      var LCF_b = 1 + 0.79 * LF;
+      var LCF_t = 1.41 + 1.38 * LF;
+      var EF_tsp_b_hd = 1.956 * LCF_b * EF_TSP_b_c;
+      var EF_tsp_t_hd = (N_ax/2) * LCF_t * EF_TSP_t_c;
+      var EF_t_25 = EF_tsp_t_hd * 0.42;
+      var EF_b_25 = EF_tsp_b_hd * 0.39;
+      var EF_t_10 = EF_tsp_t_hd * 0.6;
+      var EF_b_10 = EF_tsp_b_hd * 0.98;
+      var EF_r_10 = EF_tsp_r_hd * 0.5;
+      var pm_g_km = (EF_t_25 + EF_b_25 * f_friction + EF_r_25) + (EF_t_10 + EF_b_10 * f_friction + EF_r_10) * phi_pm;
+
+      // === VAN ENVIRONMENTAL ===
+      var ec_energy_v = (E_td_van / 1000) * CI_0 * c_carbon;
+      var ec_cong_v = c_cong * L_n;
+      var ec_PM_v = pm_g_km * L_n * (c_PM25 / 1e6);
+      var ec_noise_v = c_noise_vkm * L_n;
+      var R_t_day = (L_n / t_vl) * N_tyres;
+      var R_br_day = (L_n / br_vl) * N_pads;
+      var R_b_v_day = L_n / b_vl;
+      var ec_tyre = R_t_day * m_t_van * C_t_van * c_carbon;
+      var ec_brake = R_br_day * m_br_van * C_br_van * c_carbon;
+      var ec_bat_v = R_b_v_day * m_b_van * C_b_van * c_carbon;
+      var van_env = ec_energy_v + ec_cong_v + ec_PM_v + ec_noise_v + ec_tyre + ec_brake + ec_bat_v;
+
+      // === VAN OPEX ===
+      var C_elec_v = (E_td_van / 1000) * c_e;
+      var C_tyr = R_t_day * c_t_van_cost;
+      var C_br = (L_n / br_vl / 8) * c_br_van_cost;
+      var C_bat_opex_v = R_b_v_day * c_bv_unit;
+      var C_ds_day = c_ds / 260;
+      var C_wait_v = N_N * v_t * L_n / (2 * v_c_v * 3.6);
+      var van_opex = C_elec_v + C_tyr + C_br + C_bat_opex_v + C_ds_day + C_wait_v;
+      var van_total = van_env + van_opex;
+      var van_pp = van_total / Math.max(N_N, 1);
+
+      // === DRONE PHYSICS ===
+      var W_d = m_d * g;
+      var A_w = 2 * l_w * w_w;
+      var A_front = l_d * w_d;
+      var A_disk = N_r_val * Math.PI * Math.pow(d_r_val/2, 2);
+      var P_h = Math.pow(W_d, 1.5) / (eta_b * Math.sqrt(2 * rho * A_disk));
+      var v_d_vert = (P_h - P_d) * eta_b / W_d;
+      var v_a_vert = (P_a - P_h) * eta_b / W_d;
+      var L_net = W_d - 0.5 * rho * v_c_d*v_c_d * C_L * A_w;
+      var D_aero = 0.5 * rho * v_c_d*v_c_d * C_D_drone * A_front;
+      var T_tot = Math.sqrt(L_net*L_net + D_aero*D_aero);
+      var P_c_drone = P_h * Math.pow(T_tot / W_d, 1.5) + (D_aero * v_c_d) / eta_b;
+
+      // === DRONE TRIP TIMING ===
+      var t_a1 = h_alt / Math.max(v_a_vert, 0.01);
+      var t_c1 = d_avg_m / Math.max(v_c_d, 0.01);
+      var t_d1 = (h_alt - h_p) / Math.max(v_d_vert, 0.01);
+      var t_a2 = (h_alt - h_p) / Math.max(v_a_vert, 0.01);
+      var t_c2 = d_avg_m / Math.max(v_c_d, 0.01);
+      var t_d2 = h_alt / Math.max(v_d_vert, 0.01);
+      var t_t = t_a1+t_c1+t_d1+t_p1+t_a2+t_c2+t_d2+t_b+t_p2;
+
+      // === DRONE ENERGY ===
+      var E_vert = (P_a*(t_a1+t_a2) + P_d*(t_d1+t_d2) + P_h*t_p1) / 3600;
+      var E_cruise_d = P_c_drone * (t_c1+t_c2) / 3600;
+      var E_trip = E_vert + E_cruise_d;
+      var E_grid = E_trip / (eta_g * eta_c);
+      var E_b_val = V_nom * C_bat;
+      var E_u = E_b_val * dSoC;
+      var N_trips = (N_h * 3600) / Math.max(t_t, 1);
+      var N_tc = Math.max(1, Math.floor(E_u / Math.max(E_trip, 0.001)));
+      var t_fb = t_t - t_p2;
+      var t_ch_d = ((E_b_val/(eta_g*eta_c)) * dSoC) / Math.max(P_ch, 1);
+
+      // === FLEET SIZE ===
+      var F_min = Math.ceil(n_z / Math.max(N_trips, 0.01)) + s_spare;
+      var F = F_min;
+
+      // === BATTERY COUNT ===
+      var N_b_count = Math.max(F, Math.ceil(F * (t_ch_d / (N_tc * Math.max(t_fb/3600, 0.001))) * redundancy));
+      var N_ch_day = n_z / Math.max(N_b_count * N_tc, 0.001);
+      var D_rb_days = N_lc / Math.max(N_ch_day, 0.001);
+      var D_rb_yr = Math.ceil(365 / Math.max(D_rb_days, 0.001));
+      var D_rb_day = D_rb_yr / 365;
+      var E_d = E_grid * n_z;
+
+      // === DRONE ENVIRONMENTAL ===
+      var CI_eff = CI_0 * (1 - p_g);
+      var c_energy_d = (E_d/1000) * CI_eff * c_carbon;
+      var c_rb_day = D_rb_day * C_b_mat * m_b_mat * c_carbon;
+      var R_rd = ((t_fb/3600) * n_z) / Math.max(r_l, 1);
+      var ec_rd = R_rd * m_r_mat * C_r_mat * c_carbon;
+      var R_md = ((t_fb/3600) * n_z) / Math.max(m_l, 1);
+      var ec_md = R_md * m_m_mat * C_m_mat * c_carbon;
+      var R_dd = n_z / Math.max(pd_l, 1);
+      var ec_dd = R_dd * m_d_mat * C_d_mat * c_carbon;
+      var sum_Cimi = C_S*m_S + C_NP*m_NP + C_Al*m_Al + C_Mg*m_Mg + C_Cu*m_Cu + C_CF*m_CF + C_Gl*m_Gl;
+      var ec_fleet_day = (F * c_carbon * sum_Cimi) / Math.max(T_days, 1);
+      var A_vd_val = A_vd_factor * d_r_val;
+      var A_v_val = F * A_vd_val * lambda_g;
+      var ec_green = (A_v_val * c_eco_v) / Math.max(T_days, 1);
+      var h_crit = 61 * Math.pow(10, -(L_thresh - L_cruise)/20);
+      var t_exposed = (2*h_crit - h_p) * (1/Math.max(v_a_vert,0.01) + 1/Math.max(v_d_vert,0.01)) + t_p1;
+      var c_noise_event = (c_noise_vkm * v_c_v / 1000) * ((L_vert - L_thresh) / (2 * Math.max(L_van - L_thresh, 0.01))) * t_exposed;
+      var ec_noise_d = n_z * c_noise_event;
+      var drone_env_zone = c_energy_d + c_rb_day + ec_rd + ec_md + ec_dd + ec_fleet_day + ec_green + ec_noise_d;
+      var drone_env = drone_env_zone * N_z;
+
+      // === DRONE OPEX ===
+      var c_blend = (1-p_g) * c_e + p_g * c_g;
+      var C_elec_d = (E_d/1000) * c_blend;
+      var C_bat_rep = D_rb_day * F * c_b_unit;
+      var C_rot = R_rd * c_r_unit;
+      var C_mot = R_md * c_m_unit;
+      var C_pd = R_dd * c_pd_unit;
+      var C_wait_d = n_z * v_t * t_t / (2 * Math.max(F,1) * 3600);
+      var drone_opex_zone = C_elec_d + C_bat_rep + C_rot + C_mot + C_pd + C_wait_d;
+      var drone_opex = drone_opex_zone * N_z;
+
+      // === DRONE CAPEX ===
+      var C_fleet_amort = F * c_d_unit / Math.max(T_days, 1);
+      var C_bat_amort = N_b_count * c_b_unit / Math.max(T_days, 1);
+      var C_v_amort = c_v_capex / Math.max(T_days, 1);
+      var C_vo_day = c_vo / DAYS_YR;
+      var drone_capex_zone = C_fleet_amort + C_bat_amort + C_v_amort + C_vo_day;
+      var drone_capex = drone_capex_zone * N_z;
+
+      var drone_opex_total = drone_env + drone_opex;
+      var drone_full_total = drone_env + drone_opex + drone_capex;
+      var drone_opex_pp = drone_opex_total / Math.max(N_N, 1);
+      var drone_full_pp = drone_full_total / Math.max(N_N, 1);
+
+      // === CONSTRAINTS (C1-C8) ===
+      var constraints = {
+        C1: (F * N_trips) >= n_z,
+        C2: F <= (d_avg_km * 1000) / Math.max(d_lat, 0.01),
+        C3: d_avg_km <= 12,
+        C4: E_trip <= E_u,
+        C5: L_cruise <= L_thresh,
+        C6: true,
+        C7: p_g >= 0 && p_g <= 1,
+        C8: F >= 1
+      };
+
+      // === UPDATE KPI ===
+      var tBC = document.getElementById('tempBigCost');
+      var tSC = document.getElementById('tempSmallCost');
+      var tBT = document.getElementById('tempBigTonnes');
+      var tST = document.getElementById('tempSmallTonnes');
+      if (tBC) tBC.textContent = '\u00a3' + drone_opex_pp.toFixed(2) + '/parcel';
+      if (tSC) tSC.textContent = (typeof tr === 'function') ? tr('drone OPEX cost per parcel') : 'drone OPEX cost per parcel';
+      if (tBT) tBT.textContent = '\u00a3' + van_pp.toFixed(2) + '/parcel';
+      if (tST) tST.textContent = (typeof tr === 'function') ? tr('van total cost per parcel') : 'van total cost per parcel';
+
+      window._sim = {
+        van_env: van_env, van_opex: van_opex, van_total: van_total, van_pp: van_pp,
+        drone_env: drone_env, drone_opex: drone_opex, drone_capex: drone_capex,
+        drone_opex_pp: drone_opex_pp, drone_full_pp: drone_full_pp,
+        N_N: N_N, N_z: N_z, F: F, N_b: N_b_count, E_trip: E_trip, E_u: E_u,
+        d_avg_km: d_avg_km, t_t: t_t, L_n: L_n, A_total: A_total,
+        W_d: W_d, A_disk: A_disk, P_h: P_h, v_a: v_a_vert, v_d: v_d_vert,
+        P_c_drone: P_c_drone, A_w: A_w, A_front: A_front,
+        P_c_van: P_c_van, P_st_v: P_st_v, P_stop_v: P_stop_v,
+        A_f_van: A_f_van, E_td_van: E_td_van,
+        t_a1: t_a1, t_c1: t_c1, t_d1: t_d1, t_a2: t_a2, t_c2: t_c2, t_d2: t_d2,
+        E_vert: E_vert, E_cruise_d: E_cruise_d, E_grid: E_grid, E_b: E_b_val,
+        N_trips: N_trips, N_tc: N_tc, t_ch_d: t_ch_d, t_fb: t_fb,
+        ec_energy_v: ec_energy_v, ec_cong_v: ec_cong_v, ec_PM_v: ec_PM_v,
+        ec_noise_v: ec_noise_v, ec_tyre: ec_tyre, ec_brake: ec_brake, ec_bat_v: ec_bat_v,
+        C_elec_v: C_elec_v, C_tyr: C_tyr, C_br: C_br, C_bat_opex_v: C_bat_opex_v,
+        C_ds_day: C_ds_day, C_wait_v: C_wait_v,
+        c_energy_d: c_energy_d, c_rb_day: c_rb_day, ec_rd: ec_rd, ec_md: ec_md, ec_dd: ec_dd,
+        ec_fleet_day: ec_fleet_day, ec_green: ec_green, ec_noise_d: ec_noise_d,
+        C_elec_d: C_elec_d, C_bat_rep: C_bat_rep, C_rot: C_rot, C_mot: C_mot, C_pd: C_pd, C_wait_d: C_wait_d,
+        C_fleet_amort: C_fleet_amort, C_bat_amort: C_bat_amort, C_v_amort: C_v_amort, C_vo_day: C_vo_day,
+        LF: LF, LCF_b: LCF_b, LCF_t: LCF_t,
+        EF_tsp_b_hd: EF_tsp_b_hd, EF_tsp_t_hd: EF_tsp_t_hd,
+        EF_t_25: EF_t_25, EF_b_25: EF_b_25, EF_t_10: EF_t_10, EF_b_10: EF_b_10, EF_r_10: EF_r_10,
+        pm_g_km: pm_g_km,
+        D_rb_days: D_rb_days, D_rb_yr: D_rb_yr, D_rb_day: D_rb_day, N_ch_day: N_ch_day,
+        R_rd: R_rd, R_md: R_md, R_dd: R_dd, R_t_day: R_t_day, R_br_day: R_br_day, R_b_v_day: R_b_v_day,
+        sum_Cimi: sum_Cimi, A_vd: A_vd_val, A_v: A_v_val,
+        c_noise_event: c_noise_event, h_crit: h_crit, t_exposed: t_exposed,
+        constraints: constraints,
+        C1_val: F * N_trips, C1_req: n_z,
+        C2_max: (d_avg_km * 1000) / Math.max(d_lat, 0.01),
+        C3_val: d_avg_km,
+        C4_val: E_trip, C4_max: E_u,
+        L_cruise_val: L_cruise, L_thresh_val: L_thresh,
+        p_g_val: p_g
+      };
+      window._vanPP = van_pp;
+      window._droneOpexPP = drone_opex_pp;
+      window._droneFullPP = drone_full_pp;
+
+      if (typeof updateAllGraphs === 'function') {
+        updateAllGraphs(drone_env / Math.max(N_N,1), drone_opex_pp, van_pp);
+      }
+      if (typeof updateEquations === 'function') updateEquations();
+    }
+    // <!--Headine toggle -->
+    const toggleTonnesBtn = document.getElementById('toggleTonnes');
+    const toggleCostBtn = document.getElementById('toggleCost');
+    const headlineTonnes = document.getElementById('headlineTonnes');
+    const headlineCost = document.getElementById('headlineCost');
+    const kpiPanel = document.querySelector('.temperature-panel');
+
+    function adjustKPIHeight() {
+      setTimeout(() => {
+        const leftPanel = document.getElementById('panel-left');
+        const rightPanel = document.getElementById('panel-right');
+        if (leftPanel && rightPanel) {
+          const leftHeight = leftPanel.offsetHeight;
+          const rightHeight = rightPanel.offsetHeight;
+          const maxHeight = Math.max(leftHeight, rightHeight);
+          kpiPanel.style.minHeight = maxHeight + 'px';
+        }
+      }, 50);
+    }
+
+    toggleTonnesBtn.addEventListener('click', () => {
+      headlineTonnes.style.display = '';
+      headlineCost.style.display = 'none';
+      toggleTonnesBtn.classList.add('active');
+      toggleCostBtn.classList.remove('active');
+      adjustKPIHeight();
+    });
+    toggleCostBtn.addEventListener('click', () => {
+      headlineTonnes.style.display = 'none';
+      headlineCost.style.display = '';
+      toggleCostBtn.classList.add('active');
+      toggleTonnesBtn.classList.remove('active');
+      adjustKPIHeight();
+    });
+
+    // <!--Panel Collapse-->
+    document.querySelectorAll('.panel-header').forEach(header => {
+      const key = header.getAttribute('data-panel');
+      if (!key) return;
+      header.addEventListener('click', (e) => {
+        if (e.target.tagName === 'SPAN' && e.target.textContent === '⋮') return;
+        const panel = document.getElementById('panel-' + key);
+        const arrow = document.querySelector('[data-panel-arrow="' + key + '"]');
+        if (!panel || !arrow) return;
+        const collapsed = panel.classList.toggle('collapsed');
+        arrow.textContent = collapsed ? '▶' : '▼';
+      });
+    });
+
+    // <!--Parameter Modal-->
+    const paramModalOverlay = document.getElementById('paramModalOverlay');
+    const paramModalTitle = document.getElementById('paramModalTitle');
+    const paramModalBody = document.getElementById('paramModalBody');
+    const paramModalHelp = document.getElementById('paramModalHelp');
+    const paramModalError = document.getElementById('paramModalError');
+    const paramModalInput = document.getElementById('paramModalInput');
+    const paramModalApply = document.getElementById('paramModalApply');
+    const paramModalClose = document.getElementById('paramModalClose');
+
+    let activeSliderForModal = null;
+    let activeMin = null;
+    let activeMax = null;
+
+        const paramDescriptions = {
+      numNodes: 'Number of deliveries per day. Symbol: N_N.',
+      latSep: 'Minimum lateral separation between drones in the air (regulatory). Symbol: d_lat.',
+      parcelDropH: 'Height from which the parcel is dropped at the delivery node, in metres. Symbol: h_p.',
+      parcelDropT: 'Time taken to drop a single parcel at a delivery node, in seconds. Symbol: t_p1.',
+      batSwapT: 'Time required to swap the drone battery at the vertiport. Symbol: t_b.',
+      payloadSwapT: 'Time required to swap the drone payload at the vertiport. Symbol: t_p2.',
+      opHours: 'Number of hours per day that the drone fleet operates. Symbol: N_h.',
+      parcelMass: 'Maximum parcel mass carried by the drone in kg (Amazon MK30 airframe +35.53 kg). Symbol: m_p.',
+      rotorDiam: 'Diameter of each rotor on the drone in metres. Symbol: d_r.',
+      numRotors: 'Number of rotors on the drone airframe. Symbol: N_r.',
+      cruiseSpeed: 'Horizontal cruise speed of the drone in m/s. Symbol: v_c.',
+      altitude: 'Operational altitude of the drone during cruise flight in metres. Symbol: h_alt.',
+      greenfield: 'Fraction of the total vertiport land area that is greenfield (undeveloped) land. Symbol: lambda_g.',
+      ecoCost: 'Monetised cost of greenfield land (£/m²). Symbol: c_eco.',
+      droneUnitCost: 'Capital cost per drone (£). Symbol: c_d_unit.',
+      batteryUnitCost: 'Capital cost per drone battery (£). Symbol: c_b_unit.',
+      vertiportCapex: 'Vertiport capital cost (£). Symbol: c_v.',
+      vertiportOpex: 'Annual vertiport operator cost (£/yr). Symbol: c_vo.',
+      analysisPeriod: 'Analysis horizon in years. Symbol: T_yr.',
+      driverSalary: 'Annual salary of the delivery driver in pounds sterling. Symbol: c_ds.',
+      congCost: "UKTAG marginal external cost of road congestion per vehicle-km. Symbol: c_cong.",
+      vanSpeed: 'Cruise speed of the delivery van in m/s. Symbol: v_c,van.',
+      vanParcels: 'Number of parcels carried per van trip. Symbol: p.',
+      bhhConst: 'BHH constant for the delivery route (urban). Symbol: k.',
+      depotDist: 'Distance between the depot and the parcel delivery cluster in km. Symbol: r_bar.',
+      vanRadius: 'Operational radius of the delivery van from the depot in km. Symbol: r_o.',
+      gridCI: 'Carbon intensity of the electricity grid in kgCO2 per kWh. Symbol: CI_0.',
+      elecPrice: 'Electricity price (£/kWh). Symbol: c_e.',
+      greenTariff: 'Green energy tariff (£/kWh). Symbol: c_g.',
+      greenFrac: 'Fraction of electricity from green-tariff sources. Symbol: p_g.',
+      carbonPrice: 'Cost of carbon per kg CO2-equivalent. Symbol: c_carbon.',
+      noiseExt: 'Noise externality cost per vehicle-km. Symbol: c_noise.',
+      timeValue: 'Delivery time value per parcel-hour (£/parcel-hr). Symbol: v_t.'
+    };
+
+    function openParamModal(rowEl) {
+      const slider = rowEl.querySelector('input[type="range"]');
+      if (!slider) return;
+      activeSliderForModal = slider;
+      activeMin = parseFloat(slider.min);
+      activeMax = parseFloat(slider.max);
+      const label = rowEl.querySelector('.slider-label').textContent;
+      const paramKey = rowEl.getAttribute('data-param');
+      paramModalTitle.textContent = label;
+      paramModalBody.textContent = paramDescriptions[paramKey] ||
+        'This parameter is one of the inputs to the UAM environmental cost system.';
+      paramModalHelp.textContent =
+        'Allowed range: ' + activeMin + ' to ' + activeMax + '. Current value: ' + slider.value + '.';
+      paramModalInput.value = slider.value;
+      paramModalError.style.display = 'none';
+      paramModalOverlay.classList.add('visible');
+    }
+
+    function closeParamModal() {
+      paramModalOverlay.classList.remove('visible');
+      activeSliderForModal = null;
+    }
+
+    document.querySelectorAll('.info-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const row = e.target.closest('.slider-row');
+        if (row) openParamModal(row);
+      });
+    });
+
+    paramModalClose.addEventListener('click', closeParamModal);
+    paramModalOverlay.addEventListener('click', (e) => {
+      if (e.target === paramModalOverlay) closeParamModal();
+    });
+
+    paramModalApply.addEventListener('click', () => {
+      if (!activeSliderForModal) return;
+      const v = parseFloat(paramModalInput.value);
+      if (isNaN(v) || v < activeMin || v > activeMax) {
+        paramModalError.style.display = 'block';
+        return;
+      }
+      paramModalError.style.display = 'none';
+      activeSliderForModal.value = v;
+      updateLabelForSlider(activeSliderForModal);
+      recalcHeadline();
+      pushStateForUndo();
+      closeParamModal();
+    });
+
+    // <!--Share-->
+    const shareBtn = document.getElementById('shareBtn');
+    const shareDropdown = document.getElementById('shareDropdown');
+    const shareSend = document.getElementById('shareSend');
+    const toast = document.getElementById('toast');
+
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      shareDropdown.classList.toggle('visible');
+    });
+    document.addEventListener('click', (e) => {
+      if (!shareDropdown.contains(e.target) && e.target !== shareBtn) {
+        shareDropdown.classList.remove('visible');
+      }
+    });
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    shareSend.addEventListener('click', () => {
+      const email = document.getElementById('shareEmail').value || '';
+      const params = new URLSearchParams();
+      sliders.forEach(s => params.append(s.id, s.value));
+      const link = window.location.origin
+        ? window.location.origin + window.location.pathname + '?' + params.toString()
+        : 'file://' + window.location.pathname + '?' + params.toString();
+      const subject = encodeURIComponent('UAM‑ECS scenario link');
+      const body = encodeURIComponent('Here is the current UAM‑ECS scenario:\n\n' + link);
+      if (email) {
+        window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
+      }
+      shareDropdown.classList.remove('visible');
+      showToast('Email Sent!');
+    });
+
+    // <!--Issue Modal-->
+    const reportIssueItem = document.getElementById('reportIssueItem');
+    const issueModalOverlay = document.getElementById('issueModalOverlay');
+    const issueModalClose = document.getElementById('issueModalClose');
+    const issueSubmit = document.getElementById('issueSubmit');
+    const issueText = document.getElementById('issueText');
+
+    reportIssueItem.addEventListener('click', () => {
+      issueModalOverlay.classList.add('visible');
+    });
+    issueModalClose.addEventListener('click', () => {
+      issueModalOverlay.classList.remove('visible');
+    });
+    issueModalOverlay.addEventListener('click', (e) => {
+      if (e.target === issueModalOverlay) issueModalOverlay.classList.remove('visible');
+    });
+    issueSubmit.addEventListener('click', () => {
+      const text = issueText.value || '';
+      const mailBody = encodeURIComponent(text);
+      window.location.href =
+        'mailto:jasminezbrittan@gmail.com?subject=' +
+        encodeURIComponent('UAM‑ECS issue report') +
+        '&body=' + mailBody;
+      issueModalOverlay.classList.remove('visible');
+      issueText.value = '';
+      showToast('Issue submitted!');
+    });
+
+    // <!ABOUT MODAL
+    const aboutItem = document.getElementById('aboutItem');
+    const aboutModal = document.getElementById('aboutModal');
+    const aboutModalClose = document.getElementById('aboutModalClose');
+
+    aboutItem.addEventListener('click', () => {
+      aboutModal.classList.add('visible');
+    });
+    aboutModalClose.addEventListener('click', () => {
+      aboutModal.classList.remove('visible');
+    });
+    aboutModal.addEventListener('click', (e) => {
+      if (e.target === aboutModal) aboutModal.classList.remove('visible');
+    });
+
+    // <!--Graph Menu & Selection-->
+    const graphsMenu = document.getElementById('graphsMenu');
+    const graphsDropdown = document.getElementById('graphsDropdown');
+    const leftTitle = document.getElementById('leftTitle');
+    const rightTitle = document.getElementById('rightTitle');
+    const leftChart = document.getElementById('leftChart');
+    const rightChart = document.getElementById('rightChart');
+    const leftXAxis = document.getElementById('leftXAxis');
+    const leftYAxis = document.getElementById('leftYAxis');
+    const rightXAxis = document.getElementById('rightXAxis');
+    const rightYAxis = document.getElementById('rightYAxis');
+    const leftLegend = document.getElementById('leftLegend');
+    const rightLegend = document.getElementById('rightLegend');
+
+    let leftGraph = 'annualEnvCost';
+    let rightGraph = 'envCostPerRoute';
+
+    function attachMenuHover(menuEl, dropdownEl) {
+      let inside = false;
+      menuEl.addEventListener('mouseenter', () => {
+        inside = true;
+        dropdownEl.classList.add('visible');
+      });
+      menuEl.addEventListener('mouseleave', () => {
+        inside = false;
+        setTimeout(() => {
+          if (!inside) dropdownEl.classList.remove('visible');
+        }, 150);
+      });
+      dropdownEl.addEventListener('mouseenter', () => { inside = true; });
+      dropdownEl.addEventListener('mouseleave', () => {
+        inside = false;
+        setTimeout(() => {
+          if (!inside) dropdownEl.classList.remove('visible');
+        }, 150);
+      });
+    }
+
+    attachMenuHover(graphsMenu, graphsDropdown);
+    attachMenuHover(document.getElementById('langMenu'), document.getElementById('langDropdown'));
+    attachMenuHover(document.getElementById('helpMenu'), document.getElementById('helpDropdown'));
+    attachMenuHover(document.getElementById('simMenu'), document.getElementById('simDropdown'));
+
+    function setTick(graphId, on) {
+      const tick = graphsDropdown.querySelector('[data-tick="' + graphId + '"]');
+      if (tick) tick.textContent = on ? '✓' : '';
+    }
+
+    const graphConfig = {
+      annualEnvCost: { title: 'Total Annual Costs', xLabel: 'Year', yLabel: '\u00a3 / year' },
+      envCostPerRoute: { title: 'Environmental Cost per Delivery Route (daily)', xLabel: 'Year (5-yr intervals)', yLabel: '\u00a3 / parcel' },
+      extBreakdown: { title: 'Externality Breakdown per Route\u2011Day', xLabel: 'Category', yLabel: '\u00a3 / day' },
+      embodiedDonut: { title: 'Drone Embodied Carbon (Cradle\u2011to\u2011Gate)', xLabel: '', yLabel: '' },
+      dailyEnvCost: { title: 'Economic Operational Cost per Delivery Route (daily)', xLabel: 'Year', yLabel: '\u00a3 / day' },
+      routeCompletion: { title: 'Route Costs (2027)', xLabel: '', yLabel: '\u00a3 / day' },
+      capexPerRoute: { title: 'Economic (CAPEX) Cost per Delivery Route', xLabel: 'Year', yLabel: '\u00a3 / route' }
+    };
+
+    function configureGraphSlot(slot, graphId) {
+      const isLeft = slot === 'left';
+      const titleEl = isLeft ? leftTitle : rightTitle;
+      const xAxis = isLeft ? leftXAxis : rightXAxis;
+      const yAxis = isLeft ? leftYAxis : rightYAxis;
+      const chart = isLeft ? leftChart : rightChart;
+
+      const svgEl = chart.querySelector('.chart-grid');
+      svgEl.innerHTML = '';
+      // Enable pointer-events for donut chart (hover tooltips)
+      if (graphId === 'embodiedDonut') {
+        svgEl.classList.add('interactive');
+      } else {
+        svgEl.classList.remove('interactive');
+      }
+      const lineGraphs = ['annualEnvCost', 'dailyEnvCost', 'envCostPerRoute', 'capexPerRoute'];
+      const showLineLegend = lineGraphs.includes(graphId);
+      const legendEl = isLeft ? leftLegend : rightLegend;
+      if (showLineLegend) {
+        legendEl.style.display = 'flex';
+        legendEl.innerHTML = '<div class="badge badge-baseline">' + tr('BASELINE (GROUND DELIVERY VAN)') + '</div><div class="badge badge-current">' + tr('DRONE DELIVERIES') + '</div>';
+      } else if (graphId === 'embodiedDonut') {
+        legendEl.style.display = 'flex';
+        legendEl.style.flexWrap = 'wrap';
+        legendEl.innerHTML = ''; // will be populated by drawSeriesForChart
+      } else {
+        legendEl.style.display = 'none';
+      }
+
+      const cfg = graphConfig[graphId];
+      if (cfg) {
+        titleEl.textContent = (typeof tr === 'function') ? tr(cfg.title) : cfg.title;
+        xAxis.textContent = cfg.xLabel ? ((typeof tr === 'function') ? tr(cfg.xLabel) : cfg.xLabel) : '';
+        yAxis.textContent = cfg.yLabel ? ((typeof tr === 'function') ? tr(cfg.yLabel) : cfg.yLabel) : '';
+      }
+      drawGrid(chart, slot, graphId);
+    }
+
+    graphsDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const g = item.getAttribute('data-graph');
+        if (g === leftGraph || g === rightGraph) return;
+        const targetSlot = Math.random() < 0.5 ? 'left' : 'right';
+        if (targetSlot === 'left') {
+          setTick(leftGraph, false);
+          leftGraph = g;
+          setTick(leftGraph, true);
+          configureGraphSlot('left', leftGraph);
+        } else {
+          setTick(rightGraph, false);
+          rightGraph = g;
+          setTick(rightGraph, true);
+          configureGraphSlot('right', rightGraph);
+        }
+        recalcHeadline();
+      });
+    });
+
+    // <!--Language Dropdown — Full Translation System-->
+    const langMenu = document.getElementById('langMenu');
+    const langDropdown = document.getElementById('langDropdown');
+    const langLabel = langMenu.querySelector('.menu-label');
+
+    const T = {
+      en: {
+        // Menu bar
+        'Graphs': 'Graphs', 'Help': 'Help', 'Simulation': 'Simulation', 'Share Scenario': 'Share Scenario',
+        'Report an Issue': 'Report an Issue', 'About': 'About',
+        // Graph titles
+        'Total Annual Costs': 'Total Annual Costs',
+        'Environmental Cost per Delivery Route (daily)': 'Environmental Cost per Delivery Route (daily)',
+        'Externality Breakdown per Route\u2011Day': 'Externality Breakdown per Route\u2011Day',
+        'Drone Embodied Carbon (Cradle\u2011to\u2011Gate)': 'Drone Embodied Carbon (Cradle\u2011to\u2011Gate)',
+        'Economic Operational Cost per Delivery Route (daily)': 'Economic Operational Cost per Delivery Route (daily)',
+        'Route Costs (2027)': 'Route Costs (2027)',
+        'Economic (CAPEX) Cost per Delivery Route': 'Economic (CAPEX) Cost per Delivery Route',
+        // Legend / badges
+        'BASELINE (GROUND DELIVERY VAN)': 'BASELINE (GROUND DELIVERY VAN)',
+        'DRONE DELIVERIES': 'DRONE DELIVERIES',
+        // KPI
+        'of environmental costs by switching the delivery route to a drone fleet in 2027': 'of environmental costs by switching the delivery route to a drone fleet in 2027',
+        'of economic costs by switching the delivery route to a drone fleet in 2027': 'of economic costs by switching the delivery route to a drone fleet in 2027',
+        'Show the economic cost in £': 'Show the economic cost in \u00a3',
+        'Show the environmental cost in £': 'Show the environmental cost in \u00a3',
+        // Section titles
+        'Route Scenario Parameters': 'Route Scenario Parameters',
+        'Drone Parameters': 'Drone Parameters',
+        'Vertiport Parameters': 'Vertiport Parameters',
+        'Embodied Carbon': 'Embodied Carbon',
+        'Ground Delivery Van Parameters': 'Ground Delivery Van Parameters',
+        'Other Parameters': 'Other Parameters',
+        // Slider labels
+        'Number of delivery nodes': 'Number of delivery nodes',
+        'Average nodal distance': 'Average nodal distance',
+        'Lateral separation (in-air)': 'Lateral separation (in-air)',
+        'Parcel drop height': 'Parcel drop height',
+        'Time for parcel drop': 'Time for parcel drop',
+        'Time for battery swap': 'Time for battery swap',
+        'Time for payload swap': 'Time for payload swap',
+        'Operating hours per day': 'Operating hours per day',
+        'Analysis start year': 'Analysis start year',
+        'Analysis end year': 'Analysis end year',
+        'Current analysis year': 'Current analysis year',
+        'Drone mass': 'Drone mass',
+        'Ascending power': 'Ascending power',
+        'Descending power': 'Descending power',
+        'Rotor diameter': 'Rotor diameter',
+        'Number of drone rotors': 'Number of drone rotors',
+        'Cruise speed': 'Cruise speed',
+        'Altitude in flight': 'Altitude in flight',
+        'Front blueprint length': 'Front blueprint length',
+        'Front blueprint width': 'Front blueprint width',
+        'Length of the wing': 'Length of the wing',
+        'Width of the wing': 'Width of the wing',
+        'Nominal voltage of battery': 'Nominal voltage of battery',
+        'Capacity of battery': 'Capacity of battery',
+        'Power from DC charger': 'Power from DC charger',
+        'State of Charge change': 'State of Charge change',
+        'Lifetime battery cycles': 'Lifetime battery cycles',
+        'Rotor lifespan': 'Rotor lifespan',
+        'Motor lifespan': 'Motor lifespan',
+        'Payload door actuator lifespan': 'Payload door actuator lifespan',
+        'Spare drones': 'Spare drones',
+        'Greenfield land fraction': 'Greenfield land fraction',
+        'Cost of ecology loss on greenfield': 'Cost of ecology loss on greenfield',
+        'Embodied carbon in steel': 'Embodied carbon in steel',
+        'Mass of steel in drone': 'Mass of steel in drone',
+        'Embodied carbon in Nylon 6': 'Embodied carbon in Nylon 6',
+        'Mass of Nylon 6 in drone': 'Mass of Nylon 6 in drone',
+        'Embodied carbon in aluminium': 'Embodied carbon in aluminium',
+        'Mass of aluminium in drone': 'Mass of aluminium in drone',
+        'Embodied carbon in magnesium': 'Embodied carbon in magnesium',
+        'Mass of magnesium in drone': 'Mass of magnesium in drone',
+        'Embodied carbon in copper': 'Embodied carbon in copper',
+        'Mass of copper in drone': 'Mass of copper in drone',
+        'Embodied carbon in carbon fibre': 'Embodied carbon in carbon fibre',
+        'Mass of carbon fibre in drone': 'Mass of carbon fibre in drone',
+        'Embodied carbon in fibreglass': 'Embodied carbon in fibreglass',
+        'Mass of fibreglass in drone': 'Mass of fibreglass in drone',
+        'Embodied carbon in battery': 'Embodied carbon in battery',
+        'Mass of battery in drone': 'Mass of battery in drone',
+        'Van mass (GVW)': 'Van mass (GVW)',
+        'Usable battery capacity': 'Usable battery capacity',
+        'Delivery driver salary': 'Delivery driver salary',
+        'UKTAG congestion cost': 'UKTAG congestion cost',
+        'Factor of friction during braking': 'Factor of friction during braking',
+        'PM2.5 emissions factor HDV road wear': 'PM2.5 emissions factor HDV road wear',
+        'TSP emissions factor HDV road wear': 'TSP emissions factor HDV road wear',
+        'Start load factor': 'Start load factor',
+        'End load factor': 'End load factor',
+        'TSP brake wear factor': 'TSP brake wear factor',
+        'TSP tyre wear factor': 'TSP tyre wear factor',
+        'Acceleration time': 'Acceleration time',
+        'Deceleration time': 'Deceleration time',
+        'Van cruise speed': 'Van cruise speed',
+        'Van battery lifespan': 'Van battery lifespan',
+        'Van tyre lifespan': 'Van tyre lifespan',
+        'Van brake pad lifespan': 'Van brake pad lifespan',
+        'Number of parcels in van': 'Number of parcels in van',
+        'BHH constant': 'BHH constant',
+        'Distance depot to cluster': 'Distance depot to cluster',
+        'Operational radius of van': 'Operational radius of van',
+        'Auxiliary power': 'Auxiliary power',
+        'Van shape coefficient': 'Van shape coefficient',
+        'Van width': 'Van width',
+        'Van height': 'Van height',
+        'Power efficiency grid to charger': 'Power efficiency grid to charger',
+        'Power efficiency charger to battery': 'Power efficiency charger to battery',
+        'Power efficiency battery to aero': 'Power efficiency battery to aero',
+        'Power efficiency van drive': 'Power efficiency van drive',
+        'Power efficiency regenerative': 'Power efficiency regenerative',
+        'Cost of carbon': 'Cost of carbon',
+        'Battery redundancy factor': 'Battery redundancy factor',
+        'Grid carbon intensity': 'Grid carbon intensity',
+        'PM10 proportional damage cost': 'PM10 proportional damage cost',
+        'Cost of PM2.5 per kg': 'Cost of PM2.5 per kg',
+        'Coefficient of lift': 'Coefficient of lift',
+        'Coefficient of drag': 'Coefficient of drag',
+        'Rolling resistance': 'Rolling resistance',
+        'Share this scenario by email': 'Share this scenario by email',
+        'Year': 'Year', 'Year (5-yr intervals)': 'Year (5-yr intervals)', 'Category': 'Category',
+        'Equations': 'Equations',
+        'About this simulator': 'About this simulator',
+        'Click here to view the thesis work': 'Click here to view the thesis work',
+        '£ / year': '£ / year',
+        '£ / parcel': '£ / parcel',
+        '£ / day': '£ / day',
+        '£ / route': '£ / route',
+        'Environmental Externality Breakdown per Route‑Day': 'Environmental Externality Breakdown per Route‑Day',
+        'BASELINE (GROUND DELIVERY VAN)': 'BASELINE (GROUND DELIVERY VAN)'
+      },
+      fr: {
+        'Graphs': 'Graphiques', 'Help': 'Aide', 'Simulation': 'Simulation', 'Share Scenario': 'Partager le scénario',
+        'Report an Issue': 'Signaler un problème', 'About': 'À propos',
+        'Total Annual Costs': 'Coût environnemental annuel',
+        'Environmental Cost per Delivery Route (daily)': 'Coût environnemental par itinéraire de livraison (coût journalier)',
+        'Externality Breakdown per Route\u2011Day': 'Répartition des externalités par jour\u2011itinéraire',
+        'Drone Embodied Carbon (Cradle\u2011to\u2011Gate)': 'Carbone incorporé du drone (du berceau à la porte)',
+        'Economic Operational Cost per Delivery Route (daily)': 'Coût environnemental journalier par itinéraire',
+        'Route Costs (2027)': 'Temps d\'achèvement et coût opérationnel',
+        'Economic (CAPEX) Cost per Delivery Route': 'Coût économique (CAPEX) par itinéraire',
+        'BASELINE (GROUND DELIVERY VAN)': 'RÉFÉRENCE (LIVRAISON TERRESTRE)',
+        'DRONE DELIVERIES': 'LIVRAISONS PAR DRONE',
+        'of environmental costs by switching the delivery route to a drone fleet in 2027': 'de coûts environnementaux en transférant l\'itinéraire vers une flotte de drones en 2027',
+        'of economic costs by switching the delivery route to a drone fleet in 2027': 'de coûts économiques en transférant l\'itinéraire vers une flotte de drones en 2027',
+        'Show the economic cost in £': 'Afficher le coût économique en £',
+        'Show the environmental cost in £': 'Afficher le coût environnemental en £',
+        'Route Scenario Parameters': 'Paramètres du scénario d\'itinéraire',
+        'Drone Parameters': 'Paramètres du drone',
+        'Vertiport Parameters': 'Paramètres du vertiport',
+        'Embodied Carbon': 'Carbone incorporé',
+        'Ground Delivery Van Parameters': 'Paramètres du fourgon de livraison',
+        'Other Parameters': 'Autres paramètres',
+        'Number of delivery nodes': 'Nombre de nœuds de livraison',
+        'Average nodal distance': 'Distance nodale moyenne',
+        'Lateral separation (in-air)': 'Séparation latérale (en vol)',
+        'Parcel drop height': 'Hauteur de largage du colis',
+        'Time for parcel drop': 'Temps de largage du colis',
+        'Time for battery swap': 'Temps d\'échange de batterie',
+        'Time for payload swap': 'Temps d\'échange de charge utile',
+        'Operating hours per day': 'Heures d\'exploitation par jour',
+        'Analysis start year': 'Année de début d\'analyse',
+        'Analysis end year': 'Année de fin d\'analyse',
+        'Current analysis year': 'Année d\'analyse en cours',
+        'Drone mass': 'Masse du drone',
+        'Ascending power': 'Puissance ascensionnelle',
+        'Descending power': 'Puissance de descente',
+        'Rotor diameter': 'Diamètre du rotor',
+        'Number of drone rotors': 'Nombre de rotors',
+        'Cruise speed': 'Vitesse de croisière',
+        'Altitude in flight': 'Altitude en vol',
+        'Front blueprint length': 'Longueur du plan frontal',
+        'Front blueprint width': 'Largeur du plan frontal',
+        'Length of the wing': 'Longueur de l\'aile',
+        'Width of the wing': 'Largeur de l\'aile',
+        'Nominal voltage of battery': 'Tension nominale de la batterie',
+        'Capacity of battery': 'Capacité de la batterie',
+        'Power from DC charger': 'Puissance du chargeur CC',
+        'State of Charge change': 'Variation de l\'état de charge',
+        'Lifetime battery cycles': 'Cycles de vie de la batterie',
+        'Rotor lifespan': 'Durée de vie du rotor',
+        'Motor lifespan': 'Durée de vie du moteur',
+        'Payload door actuator lifespan': 'Durée de vie de l\'actionneur de porte',
+        'Spare drones': 'Drones de rechange',
+        'Greenfield land fraction': 'Fraction de terrain vierge',
+        'Cost of ecology loss on greenfield': 'Coût de la perte écologique',
+        'Embodied carbon in steel': 'Carbone incorporé dans l\'acier',
+        'Mass of steel in drone': 'Masse d\'acier dans le drone',
+        'Embodied carbon in Nylon 6': 'Carbone incorporé dans le Nylon 6',
+        'Mass of Nylon 6 in drone': 'Masse de Nylon 6 dans le drone',
+        'Embodied carbon in aluminium': 'Carbone incorporé dans l\'aluminium',
+        'Mass of aluminium in drone': 'Masse d\'aluminium dans le drone',
+        'Embodied carbon in magnesium': 'Carbone incorporé dans le magnésium',
+        'Mass of magnesium in drone': 'Masse de magnésium dans le drone',
+        'Embodied carbon in copper': 'Carbone incorporé dans le cuivre',
+        'Mass of copper in drone': 'Masse de cuivre dans le drone',
+        'Embodied carbon in carbon fibre': 'Carbone incorporé dans la fibre de carbone',
+        'Mass of carbon fibre in drone': 'Masse de fibre de carbone dans le drone',
+        'Embodied carbon in fibreglass': 'Carbone incorporé dans la fibre de verre',
+        'Mass of fibreglass in drone': 'Masse de fibre de verre dans le drone',
+        'Embodied carbon in battery': 'Carbone incorporé dans la batterie',
+        'Mass of battery in drone': 'Masse de la batterie dans le drone',
+        'Van mass (GVW)': 'Masse du fourgon (PTAC)',
+        'Usable battery capacity': 'Capacité utilisable de la batterie',
+        'Delivery driver salary': 'Salaire du chauffeur-livreur',
+        'UKTAG congestion cost': 'Coût de congestion UKTAG',
+        'Factor of friction during braking': 'Coefficient de friction au freinage',
+        'PM2.5 emissions factor HDV road wear': 'Facteur d\'émissions PM2,5 usure route VPL',
+        'TSP emissions factor HDV road wear': 'Facteur d\'émissions TSP usure route VPL',
+        'Start load factor': 'Facteur de charge initial',
+        'End load factor': 'Facteur de charge final',
+        'TSP brake wear factor': 'Facteur d\'usure frein TSP',
+        'TSP tyre wear factor': 'Facteur d\'usure pneu TSP',
+        'Acceleration time': 'Temps d\'accélération',
+        'Deceleration time': 'Temps de décélération',
+        'Van cruise speed': 'Vitesse de croisière du fourgon',
+        'Van battery lifespan': 'Durée de vie batterie du fourgon',
+        'Van tyre lifespan': 'Durée de vie pneu du fourgon',
+        'Van brake pad lifespan': 'Durée de vie plaquettes de frein',
+        'Number of parcels in van': 'Nombre de colis dans le fourgon',
+        'BHH constant': 'Constante BHH',
+        'Distance depot to cluster': 'Distance dépôt au groupement',
+        'Operational radius of van': 'Rayon opérationnel du fourgon',
+        'Auxiliary power': 'Puissance auxiliaire',
+        'Van shape coefficient': 'Coefficient de forme du fourgon',
+        'Van width': 'Largeur du fourgon',
+        'Van height': 'Hauteur du fourgon',
+        'Power efficiency grid to charger': 'Rendement réseau vers chargeur',
+        'Power efficiency charger to battery': 'Rendement chargeur vers batterie',
+        'Power efficiency battery to aero': 'Rendement batterie vers aéro',
+        'Power efficiency van drive': 'Rendement transmission fourgon',
+        'Power efficiency regenerative': 'Rendement régénératif',
+        'Cost of carbon': 'Coût du carbone',
+        'Battery redundancy factor': 'Facteur de redondance',
+        'Grid carbon intensity': 'Intensité carbone du réseau',
+        'PM10 proportional damage cost': 'Coût proportionnel des dommages PM10',
+        'Cost of PM2.5 per kg': 'Coût des PM2,5 par kg',
+        'Coefficient of lift': 'Coefficient de portance',
+        'Coefficient of drag': 'Coefficient de traînée',
+        'Rolling resistance': 'Résistance au roulement',
+        'Share this scenario by email': 'Partager ce scénario par e-mail',
+        'Year': 'Année', 'Year (5-yr intervals)': 'Année (intervalles de 5 ans)', 'Category': 'Catégorie',
+        'Equations': 'Équations',
+        'About this simulator': 'À propos de ce simulateur',
+        'Click here to view the thesis work': 'Cliquer ici pour voir les travaux de thèse',
+        '£ / year': '£ / an',
+        '£ / parcel': '£ / colis',
+        '£ / day': '£ / jour',
+        '£ / route': '£ / itinéraire',
+        'Environmental Externality Breakdown per Route‑Day': 'Répartition des externalités environnementales par jour‑itinéraire',
+        'BASELINE (GROUND DELIVERY VAN)': 'RÉFÉRENCE (FOURGON DE LIVRAISON)'
+      },
+      de: {
+        'Graphs': 'Diagramme', 'Help': 'Hilfe', 'Simulation': 'Simulation', 'Share Scenario': 'Szenario teilen',
+        'Report an Issue': 'Problem melden', 'About': 'Über',
+        'Total Annual Costs': 'Jährliche Umweltkosten',
+        'Environmental Cost per Delivery Route (daily)': 'Umweltkosten pro Lieferroute (Tageskosten)',
+        'Externality Breakdown per Route\u2011Day': 'Aufschlüsselung der Externalitäten pro Routentag',
+        'Drone Embodied Carbon (Cradle\u2011to\u2011Gate)': 'Graue Energie der Drohne (Wiege bis Werkstor)',
+        'Economic Operational Cost per Delivery Route (daily)': 'Tägliche Umweltkosten pro Route',
+        'Route Costs (2027)': 'Routenzeit und Betriebskosten',
+        'Economic (CAPEX) Cost per Delivery Route': 'Wirtschaftliche (CAPEX) Kosten pro Lieferroute',
+        'BASELINE (GROUND DELIVERY VAN)': 'REFERENZ (BODENLIEFERUNG)',
+        'DRONE DELIVERIES': 'DROHNENLIEFERUNGEN',
+        'of environmental costs by switching the delivery route to a drone fleet in 2027': 'an Umweltkosten durch Umstellung auf eine Drohnenflotte 2027',
+        'of economic costs by switching the delivery route to a drone fleet in 2027': 'an Wirtschaftskosten durch Umstellung auf eine Drohnenflotte 2027',
+        'Show the economic cost in £': 'Wirtschaftskosten in £ anzeigen',
+        'Show the environmental cost in £': 'Umweltkosten in £ anzeigen',
+        'Route Scenario Parameters': 'Routenszenario-Parameter',
+        'Drone Parameters': 'Drohnenparameter',
+        'Vertiport Parameters': 'Vertiport-Parameter',
+        'Embodied Carbon': 'Graue Energie',
+        'Ground Delivery Van Parameters': 'Lieferwagen-Parameter',
+        'Other Parameters': 'Sonstige Parameter',
+        'Number of delivery nodes': 'Anzahl der Lieferknoten',
+        'Average nodal distance': 'Durchschnittliche Knotenentfernung',
+        'Lateral separation (in-air)': 'Seitlicher Abstand (Luft)',
+        'Parcel drop height': 'Paketabwurfhöhe',
+        'Time for parcel drop': 'Zeit für Paketabwurf',
+        'Time for battery swap': 'Zeit für Batteriewechsel',
+        'Time for payload swap': 'Zeit für Nutzlastwechsel',
+        'Operating hours per day': 'Betriebsstunden pro Tag',
+        'Analysis start year': 'Startjahr der Analyse',
+        'Analysis end year': 'Endjahr der Analyse',
+        'Current analysis year': 'Aktuelles Analysejahr',
+        'Drone mass': 'Drohnenmasse',
+        'Ascending power': 'Aufstiegsleistung',
+        'Descending power': 'Abstiegsleistung',
+        'Rotor diameter': 'Rotordurchmesser',
+        'Number of drone rotors': 'Anzahl der Rotoren',
+        'Cruise speed': 'Reisegeschwindigkeit',
+        'Altitude in flight': 'Flughöhe',
+        'Front blueprint length': 'Frontlänge',
+        'Front blueprint width': 'Frontbreite',
+        'Length of the wing': 'Flügellänge',
+        'Width of the wing': 'Flügelbreite',
+        'Nominal voltage of battery': 'Nennspannung der Batterie',
+        'Capacity of battery': 'Batteriekapazität',
+        'Power from DC charger': 'Leistung vom DC-Ladegerät',
+        'State of Charge change': 'Ladezustandsänderung',
+        'Lifetime battery cycles': 'Lebensdauer Batteriezyklen',
+        'Rotor lifespan': 'Rotor-Lebensdauer',
+        'Motor lifespan': 'Motor-Lebensdauer',
+        'Payload door actuator lifespan': 'Lebensdauer Türaktuator',
+        'Spare drones': 'Ersatzdrohnen',
+        'Greenfield land fraction': 'Grünlandanteil',
+        'Cost of ecology loss on greenfield': 'Kosten des Ökologieverlusts',
+        'Embodied carbon in steel': 'Graue Energie in Stahl',
+        'Mass of steel in drone': 'Stahlmasse in der Drohne',
+        'Embodied carbon in Nylon 6': 'Graue Energie in Nylon 6',
+        'Mass of Nylon 6 in drone': 'Nylon-6-Masse in der Drohne',
+        'Embodied carbon in aluminium': 'Graue Energie in Aluminium',
+        'Mass of aluminium in drone': 'Aluminiummasse in der Drohne',
+        'Embodied carbon in magnesium': 'Graue Energie in Magnesium',
+        'Mass of magnesium in drone': 'Magnesiummasse in der Drohne',
+        'Embodied carbon in copper': 'Graue Energie in Kupfer',
+        'Mass of copper in drone': 'Kupfermasse in der Drohne',
+        'Embodied carbon in carbon fibre': 'Graue Energie in Kohlefaser',
+        'Mass of carbon fibre in drone': 'Kohlefasermasse in der Drohne',
+        'Embodied carbon in fibreglass': 'Graue Energie in Glasfaser',
+        'Mass of fibreglass in drone': 'Glasfasermasse in der Drohne',
+        'Embodied carbon in battery': 'Graue Energie in der Batterie',
+        'Mass of battery in drone': 'Batteriemasse in der Drohne',
+        'Van mass (GVW)': 'Fahrzeugmasse (zGG)',
+        'Usable battery capacity': 'Nutzbare Batteriekapazität',
+        'Delivery driver salary': 'Fahrerlohn',
+        'UKTAG congestion cost': 'UKTAG-Staukosten',
+        'Factor of friction during braking': 'Reibungskoeffizient beim Bremsen',
+        'PM2.5 emissions factor HDV road wear': 'PM2,5-Emissionsfaktor Straßenabrieb',
+        'TSP emissions factor HDV road wear': 'TSP-Emissionsfaktor Straßenabrieb',
+        'Start load factor': 'Anfangslastfaktor',
+        'End load factor': 'Endlastfaktor',
+        'TSP brake wear factor': 'TSP-Bremsabriebfaktor',
+        'TSP tyre wear factor': 'TSP-Reifenabriebfaktor',
+        'Acceleration time': 'Beschleunigungszeit',
+        'Deceleration time': 'Verzögerungszeit',
+        'Van cruise speed': 'Reisegeschwindigkeit Lieferwagen',
+        'Van battery lifespan': 'Batterielebensdauer Lieferwagen',
+        'Van tyre lifespan': 'Reifenlebensdauer Lieferwagen',
+        'Van brake pad lifespan': 'Bremsbelaglebensdauer',
+        'Number of parcels in van': 'Anzahl Pakete im Lieferwagen',
+        'BHH constant': 'BHH-Konstante',
+        'Distance depot to cluster': 'Entfernung Depot zum Cluster',
+        'Operational radius of van': 'Betriebsradius des Lieferwagens',
+        'Auxiliary power': 'Hilfsleistung',
+        'Van shape coefficient': 'Formkoeffizient Lieferwagen',
+        'Van width': 'Lieferwagenbreite',
+        'Van height': 'Lieferwagenhöhe',
+        'Power efficiency grid to charger': 'Wirkungsgrad Netz zu Ladegerät',
+        'Power efficiency charger to battery': 'Wirkungsgrad Ladegerät zu Batterie',
+        'Power efficiency battery to aero': 'Wirkungsgrad Batterie zu Aero',
+        'Power efficiency van drive': 'Wirkungsgrad Antrieb Lieferwagen',
+        'Power efficiency regenerative': 'Wirkungsgrad Rekuperation',
+        'Cost of carbon': 'Kohlenstoffkosten',
+        'Battery redundancy factor': 'Redundanzfaktor',
+        'Grid carbon intensity': 'CO₂-Intensität des Netzes',
+        'PM10 proportional damage cost': 'PM10 proportionale Schadenskosten',
+        'Cost of PM2.5 per kg': 'PM2,5-Kosten pro kg',
+        'Coefficient of lift': 'Auftriebsbeiwert',
+        'Coefficient of drag': 'Widerstandsbeiwert',
+        'Rolling resistance': 'Rollwiderstand',
+        'Share this scenario by email': 'Szenario per E-Mail teilen',
+        'Year': 'Jahr', 'Year (5-yr intervals)': 'Jahr (5-Jahres-Intervalle)', 'Category': 'Kategorie',
+        'Equations': 'Gleichungen',
+        'About this simulator': 'Über diesen Simulator',
+        'Click here to view the thesis work': 'Klicken Sie hier, um die Doktorarbeit anzusehen',
+        '£ / year': '£ / Jahr',
+        '£ / parcel': '£ / Paket',
+        '£ / day': '£ / Tag',
+        '£ / route': '£ / Route',
+        'Environmental Externality Breakdown per Route‑Day': 'Aufschlüsselung der Umweltexternalitäten pro Routentag',
+        'BASELINE (GROUND DELIVERY VAN)': 'REFERENZ (LIEFERWAGEN)'
+      },
+      es: {
+        'Graphs': 'Gráficos', 'Help': 'Ayuda', 'Simulation': 'Simulación', 'Share Scenario': 'Compartir escenario',
+        'Report an Issue': 'Informar de un problema', 'About': 'Acerca de',
+        'Total Annual Costs': 'Coste medioambiental anual',
+        'Environmental Cost per Delivery Route (daily)': 'Coste medioambiental por ruta de entrega (coste diario)',
+        'Externality Breakdown per Route\u2011Day': 'Desglose de externalidades por día\u2011ruta',
+        'Drone Embodied Carbon (Cradle\u2011to\u2011Gate)': 'Carbono incorporado del dron (de la cuna a la puerta)',
+        'Economic Operational Cost per Delivery Route (daily)': 'Coste medioambiental diario por ruta',
+        'Route Costs (2027)': 'Tiempo de ruta y coste operativo',
+        'Economic (CAPEX) Cost per Delivery Route': 'Coste económico (CAPEX) por ruta de entrega',
+        'BASELINE (GROUND DELIVERY VAN)': 'REFERENCIA (ENTREGA TERRESTRE)',
+        'DRONE DELIVERIES': 'ENTREGAS CON DRON',
+        'of environmental costs by switching the delivery route to a drone fleet in 2027': 'de costes medioambientales al cambiar la ruta a una flota de drones en 2027',
+        'of economic costs by switching the delivery route to a drone fleet in 2027': 'de costes económicos al cambiar la ruta a una flota de drones en 2027',
+        'Show the economic cost in £': 'Mostrar el coste económico en £',
+        'Show the environmental cost in £': 'Mostrar el coste medioambiental en £',
+        'Route Scenario Parameters': 'Parámetros del escenario de ruta',
+        'Drone Parameters': 'Parámetros del dron',
+        'Vertiport Parameters': 'Parámetros del vertipuerto',
+        'Embodied Carbon': 'Carbono incorporado',
+        'Ground Delivery Van Parameters': 'Parámetros de la furgoneta de reparto',
+        'Other Parameters': 'Otros parámetros',
+        'Number of delivery nodes': 'Número de nodos de entrega',
+        'Average nodal distance': 'Distancia nodal media',
+        'Lateral separation (in-air)': 'Separación lateral (en vuelo)',
+        'Parcel drop height': 'Altura de lanzamiento del paquete',
+        'Time for parcel drop': 'Tiempo de lanzamiento del paquete',
+        'Time for battery swap': 'Tiempo de cambio de batería',
+        'Time for payload swap': 'Tiempo de cambio de carga útil',
+        'Operating hours per day': 'Horas de operación por día',
+        'Analysis start year': 'Año de inicio del análisis',
+        'Analysis end year': 'Año de fin del análisis',
+        'Current analysis year': 'Año de análisis actual',
+        'Drone mass': 'Masa del dron', 'Ascending power': 'Potencia de ascenso', 'Descending power': 'Potencia de descenso',
+        'Rotor diameter': 'Diámetro del rotor', 'Number of drone rotors': 'Número de rotores',
+        'Cruise speed': 'Velocidad de crucero', 'Altitude in flight': 'Altitud en vuelo',
+        'Front blueprint length': 'Longitud frontal', 'Front blueprint width': 'Anchura frontal',
+        'Length of the wing': 'Longitud del ala', 'Width of the wing': 'Anchura del ala',
+        'Nominal voltage of battery': 'Tensión nominal de la batería', 'Capacity of battery': 'Capacidad de la batería',
+        'Power from DC charger': 'Potencia del cargador CC', 'State of Charge change': 'Cambio de estado de carga',
+        'Lifetime battery cycles': 'Ciclos de vida de la batería', 'Rotor lifespan': 'Vida útil del rotor',
+        'Motor lifespan': 'Vida útil del motor', 'Payload door actuator lifespan': 'Vida útil del actuador de puerta',
+        'Spare drones': 'Drones de repuesto', 'Greenfield land fraction': 'Fracción de terreno virgen',
+        'Cost of ecology loss on greenfield': 'Coste de pérdida ecológica',
+        'Embodied carbon in steel': 'Carbono incorporado en acero', 'Mass of steel in drone': 'Masa de acero en el dron',
+        'Embodied carbon in Nylon 6': 'Carbono incorporado en Nylon 6', 'Mass of Nylon 6 in drone': 'Masa de Nylon 6 en el dron',
+        'Embodied carbon in aluminium': 'Carbono incorporado en aluminio', 'Mass of aluminium in drone': 'Masa de aluminio en el dron',
+        'Embodied carbon in magnesium': 'Carbono incorporado en magnesio', 'Mass of magnesium in drone': 'Masa de magnesio en el dron',
+        'Embodied carbon in copper': 'Carbono incorporado en cobre', 'Mass of copper in drone': 'Masa de cobre en el dron',
+        'Embodied carbon in carbon fibre': 'Carbono incorporado en fibra de carbono', 'Mass of carbon fibre in drone': 'Masa de fibra de carbono en el dron',
+        'Embodied carbon in fibreglass': 'Carbono incorporado en fibra de vidrio', 'Mass of fibreglass in drone': 'Masa de fibra de vidrio en el dron',
+        'Embodied carbon in battery': 'Carbono incorporado en batería', 'Mass of battery in drone': 'Masa de la batería en el dron',
+        'Van mass (GVW)': 'Masa de la furgoneta (MMA)', 'Usable battery capacity': 'Capacidad útil de batería',
+        'Delivery driver salary': 'Salario del conductor', 'UKTAG congestion cost': 'Coste de congestión UKTAG',
+        'Factor of friction during braking': 'Coeficiente de fricción al frenar',
+        'PM2.5 emissions factor HDV road wear': 'Factor de emisiones PM2,5 desgaste vial',
+        'TSP emissions factor HDV road wear': 'Factor de emisiones TSP desgaste vial',
+        'Start load factor': 'Factor de carga inicial', 'End load factor': 'Factor de carga final',
+        'TSP brake wear factor': 'Factor de desgaste de freno TSP', 'TSP tyre wear factor': 'Factor de desgaste de neumático TSP',
+        'Acceleration time': 'Tiempo de aceleración', 'Deceleration time': 'Tiempo de deceleración',
+        'Van cruise speed': 'Velocidad de crucero de la furgoneta', 'Van battery lifespan': 'Vida útil batería furgoneta',
+        'Van tyre lifespan': 'Vida útil neumático furgoneta', 'Van brake pad lifespan': 'Vida útil pastillas de freno',
+        'Number of parcels in van': 'Número de paquetes en la furgoneta', 'BHH constant': 'Constante BHH',
+        'Distance depot to cluster': 'Distancia del depósito al grupo', 'Operational radius of van': 'Radio operativo de la furgoneta',
+        'Auxiliary power': 'Potencia auxiliar', 'Van shape coefficient': 'Coeficiente de forma furgoneta',
+        'Van width': 'Anchura de la furgoneta', 'Van height': 'Altura de la furgoneta',
+        'Power efficiency grid to charger': 'Rendimiento red a cargador',
+        'Power efficiency charger to battery': 'Rendimiento cargador a batería',
+        'Power efficiency battery to aero': 'Rendimiento batería a aero',
+        'Power efficiency van drive': 'Rendimiento transmisión furgoneta',
+        'Power efficiency regenerative': 'Rendimiento regenerativo',
+        'Cost of carbon': 'Coste del carbono', 'Battery redundancy factor': 'Factor de redundancia',
+        'Grid carbon intensity': 'Intensidad de carbono de la red',
+        'PM10 proportional damage cost': 'Coste proporcional de daños PM10', 'Cost of PM2.5 per kg': 'Coste de PM2,5 por kg',
+        'Coefficient of lift': 'Coeficiente de sustentación', 'Coefficient of drag': 'Coeficiente de resistencia',
+        'Rolling resistance': 'Resistencia a la rodadura',
+        'Share this scenario by email': 'Compartir este escenario por correo',
+        'Year': 'Año', 'Year (5-yr intervals)': 'Año (intervalos de 5 años)', 'Category': 'Categoría',
+        'Equations': 'Ecuaciones',
+        'About this simulator': 'Acerca de este simulador',
+        'Click here to view the thesis work': 'Haga clic aquí para ver el trabajo de tesis',
+        '£ / year': '£ / año',
+        '£ / parcel': '£ / paquete',
+        '£ / day': '£ / día',
+        '£ / route': '£ / ruta',
+        'Environmental Externality Breakdown per Route‑Day': 'Desglose de externalidades ambientales por día‑ruta',
+        'BASELINE (GROUND DELIVERY VAN)': 'REFERENCIA (FURGONETA DE REPARTO)'
+      },
+      hi: {
+        'Graphs': 'ग्राफ़', 'Help': 'सहायता', 'Simulation': 'सिमुलेशन', 'Share Scenario': 'परिदृश्य साझा करें',
+        'Report an Issue': 'समस्या की रिपोर्ट करें', 'About': 'के बारे में',
+        'Total Annual Costs': 'वार्षिक पर्यावरणीय लागत',
+        'Environmental Cost per Delivery Route (daily)': 'प्रति डिलीवरी मार्ग पर्यावरणीय लागत (दैनिक)',
+        'Externality Breakdown per Route\u2011Day': 'प्रति मार्ग-दिन बाह्यता विश्लेषण',
+        'Drone Embodied Carbon (Cradle\u2011to\u2011Gate)': 'ड्रोन निहित कार्बन (उत्पादन तक)',
+        'Economic Operational Cost per Delivery Route (daily)': 'प्रति मार्ग दैनिक पर्यावरणीय लागत',
+        'Route Costs (2027)': 'मार्ग पूर्णता समय और परिचालन लागत',
+        'Economic (CAPEX) Cost per Delivery Route': 'प्रति डिलीवरी मार्ग आर्थिक (CAPEX) लागत',
+        'BASELINE (GROUND DELIVERY VAN)': 'आधार रेखा (भूमि वितरण)',
+        'DRONE DELIVERIES': 'ड्रोन डिलीवरी',
+        'of environmental costs by switching the delivery route to a drone fleet in 2027': '2027 में ड्रोन बेड़े पर स्विच करके पर्यावरणीय लागत',
+        'of economic costs by switching the delivery route to a drone fleet in 2027': '2027 में ड्रोन बेड़े पर स्विच करके आर्थिक लागत',
+        'Show the economic cost in £': 'आर्थिक लागत £ में दिखाएं',
+        'Show the environmental cost in £': 'पर्यावरणीय लागत £ में दिखाएं',
+        'Route Scenario Parameters': 'मार्ग परिदृश्य पैरामीटर',
+        'Drone Parameters': 'ड्रोन पैरामीटर',
+        'Vertiport Parameters': 'वर्टिपोर्ट पैरामीटर',
+        'Embodied Carbon': 'निहित कार्बन',
+        'Ground Delivery Van Parameters': 'डिलीवरी वैन पैरामीटर',
+        'Other Parameters': 'अन्य पैरामीटर',
+        'Number of delivery nodes': 'डिलीवरी नोड्स की संख्या',
+        'Average nodal distance': 'औसत नोडल दूरी',
+        'Lateral separation (in-air)': 'पार्श्व पृथक्करण (हवा में)',
+        'Parcel drop height': 'पार्सल ड्रॉप ऊंचाई',
+        'Time for parcel drop': 'पार्सल ड्रॉप का समय',
+        'Time for battery swap': 'बैटरी बदलने का समय',
+        'Time for payload swap': 'पेलोड बदलने का समय',
+        'Operating hours per day': 'प्रतिदिन संचालन घंटे',
+        'Analysis start year': 'विश्लेषण प्रारंभ वर्ष',
+        'Analysis end year': 'विश्लेषण अंत वर्ष',
+        'Current analysis year': 'वर्तमान विश्लेषण वर्ष',
+        'Drone mass': 'ड्रोन द्रव्यमान', 'Ascending power': 'चढ़ाई शक्ति', 'Descending power': 'अवरोहण शक्ति',
+        'Rotor diameter': 'रोटर व्यास', 'Number of drone rotors': 'रोटरों की संख्या',
+        'Cruise speed': 'परिभ्रमण गति', 'Altitude in flight': 'उड़ान ऊंचाई',
+        'Front blueprint length': 'सामने की लंबाई', 'Front blueprint width': 'सामने की चौड़ाई',
+        'Length of the wing': 'पंख की लंबाई', 'Width of the wing': 'पंख की चौड़ाई',
+        'Nominal voltage of battery': 'बैटरी का नाममात्र वोल्टेज', 'Capacity of battery': 'बैटरी की क्षमता',
+        'Power from DC charger': 'DC चार्जर से शक्ति', 'State of Charge change': 'चार्ज स्थिति परिवर्तन',
+        'Lifetime battery cycles': 'बैटरी जीवनकाल चक्र', 'Rotor lifespan': 'रोटर जीवनकाल',
+        'Motor lifespan': 'मोटर जीवनकाल', 'Payload door actuator lifespan': 'दरवाज़ा एक्चुएटर जीवनकाल',
+        'Spare drones': 'अतिरिक्त ड्रोन', 'Greenfield land fraction': 'हरित भूमि अंश',
+        'Cost of ecology loss on greenfield': 'पारिस्थितिकी हानि लागत',
+        'Embodied carbon in steel': 'इस्पात में निहित कार्बन', 'Mass of steel in drone': 'ड्रोन में इस्पात द्रव्यमान',
+        'Embodied carbon in Nylon 6': 'नायलॉन 6 में निहित कार्बन', 'Mass of Nylon 6 in drone': 'ड्रोन में नायलॉन 6 द्रव्यमान',
+        'Embodied carbon in aluminium': 'एल्युमीनियम में निहित कार्बन', 'Mass of aluminium in drone': 'ड्रोन में एल्युमीनियम द्रव्यमान',
+        'Embodied carbon in magnesium': 'मैग्नीशियम में निहित कार्बन', 'Mass of magnesium in drone': 'ड्रोन में मैग्नीशियम द्रव्यमान',
+        'Embodied carbon in copper': 'तांबे में निहित कार्बन', 'Mass of copper in drone': 'ड्रोन में तांबा द्रव्यमान',
+        'Embodied carbon in carbon fibre': 'कार्बन फाइबर में निहित कार्बन', 'Mass of carbon fibre in drone': 'ड्रोन में कार्बन फाइबर द्रव्यमान',
+        'Embodied carbon in fibreglass': 'फाइबरग्लास में निहित कार्बन', 'Mass of fibreglass in drone': 'ड्रोन में फाइबरग्लास द्रव्यमान',
+        'Embodied carbon in battery': 'बैटरी में निहित कार्बन', 'Mass of battery in drone': 'ड्रोन में बैटरी द्रव्यमान',
+        'Van mass (GVW)': 'वैन द्रव्यमान (GVW)', 'Usable battery capacity': 'उपयोग योग्य बैटरी क्षमता',
+        'Delivery driver salary': 'डिलीवरी ड्राइवर वेतन', 'UKTAG congestion cost': 'UKTAG भीड़भाड़ लागत',
+        'Factor of friction during braking': 'ब्रेकिंग घर्षण गुणांक',
+        'PM2.5 emissions factor HDV road wear': 'PM2.5 उत्सर्जन कारक सड़क घिसाव',
+        'TSP emissions factor HDV road wear': 'TSP उत्सर्जन कारक सड़क घिसाव',
+        'Start load factor': 'प्रारंभिक भार कारक', 'End load factor': 'अंतिम भार कारक',
+        'TSP brake wear factor': 'TSP ब्रेक घिसाव कारक', 'TSP tyre wear factor': 'TSP टायर घिसाव कारक',
+        'Acceleration time': 'त्वरण समय', 'Deceleration time': 'मंदन समय',
+        'Van cruise speed': 'वैन परिभ्रमण गति', 'Van battery lifespan': 'वैन बैटरी जीवनकाल',
+        'Van tyre lifespan': 'वैन टायर जीवनकाल', 'Van brake pad lifespan': 'वैन ब्रेक पैड जीवनकाल',
+        'Number of parcels in van': 'वैन में पार्सल की संख्या', 'BHH constant': 'BHH स्थिरांक',
+        'Distance depot to cluster': 'डिपो से क्लस्टर दूरी', 'Operational radius of van': 'वैन का परिचालन त्रिज्या',
+        'Auxiliary power': 'सहायक शक्ति', 'Van shape coefficient': 'वैन आकार गुणांक',
+        'Van width': 'वैन चौड़ाई', 'Van height': 'वैन ऊंचाई',
+        'Power efficiency grid to charger': 'ग्रिड से चार्जर दक्षता',
+        'Power efficiency charger to battery': 'चार्जर से बैटरी दक्षता',
+        'Power efficiency battery to aero': 'बैटरी से एरो दक्षता',
+        'Power efficiency van drive': 'वैन ड्राइव दक्षता',
+        'Power efficiency regenerative': 'पुनर्जनन दक्षता',
+        'Cost of carbon': 'कार्बन लागत', 'Battery redundancy factor': 'अतिरेक कारक',
+        'Grid carbon intensity': 'ग्रिड कार्बन तीव्रता',
+        'PM10 proportional damage cost': 'PM10 आनुपातिक क्षति लागत', 'Cost of PM2.5 per kg': 'PM2.5 प्रति किग्रा लागत',
+        'Coefficient of lift': 'उत्थान गुणांक', 'Coefficient of drag': 'प्रतिरोध गुणांक',
+        'Rolling resistance': 'रोलिंग प्रतिरोध',
+        'Share this scenario by email': 'ईमेल द्वारा साझा करें',
+        'Year': 'वर्ष', 'Year (5-yr intervals)': 'वर्ष (5-वर्ष अंतराल)', 'Category': 'श्रेणी',
+        'Equations': 'समीकरण',
+        'About this simulator': 'इस सिम्युलेटर के बारे में',
+        'Click here to view the thesis work': 'थीसिस कार्य देखने के लिए यहाँ क्लिक करें',
+        '£ / year': '£ / वर्ष',
+        '£ / parcel': '£ / पार्सल',
+        '£ / day': '£ / दिन',
+        '£ / route': '£ / मार्ग',
+        'Environmental Externality Breakdown per Route‑Day': 'मार्ग‑दिवस प्रति पर्यावरणीय बाह्यता विश्लेषण',
+        'BASELINE (GROUND DELIVERY VAN)': 'आधार (ग्राउंड डिलीवरी वैन)'
+      },
+      zh: {
+        'Graphs': '图表', 'Help': '帮助', 'Simulation': '模拟', 'Share Scenario': '分享方案',
+        'Report an Issue': '报告问题', 'About': '关于',
+        'Total Annual Costs': '年度环境成本',
+        'Environmental Cost per Delivery Route (daily)': '每条配送路线的环境成本（日成本）',
+        'Externality Breakdown per Route\u2011Day': '每条路线每日外部性分解',
+        'Drone Embodied Carbon (Cradle\u2011to\u2011Gate)': '无人机隐含碳（从摇篮到大门）',
+        'Economic Operational Cost per Delivery Route (daily)': '每条路线日环境成本',
+        'Route Costs (2027)': '路线完成时间和运营成本',
+        'Economic (CAPEX) Cost per Delivery Route': '每条配送路线经济（资本支出）成本',
+        'BASELINE (GROUND DELIVERY VAN)': '基准（地面配送）',
+        'DRONE DELIVERIES': '无人机配送',
+        'of environmental costs by switching the delivery route to a drone fleet in 2027': '的环境成本（2027年转换为无人机机队）',
+        'of economic costs by switching the delivery route to a drone fleet in 2027': '的经济成本（2027年转换为无人机机队）',
+        'Show the economic cost in £': '显示经济成本（£）',
+        'Show the environmental cost in £': '显示环境成本（£）',
+        'Route Scenario Parameters': '路线场景参数',
+        'Drone Parameters': '无人机参数',
+        'Vertiport Parameters': '垂直起降场参数',
+        'Embodied Carbon': '隐含碳',
+        'Ground Delivery Van Parameters': '配送货车参数',
+        'Other Parameters': '其他参数',
+        'Number of delivery nodes': '配送节点数', 'Average nodal distance': '平均节点距离',
+        'Lateral separation (in-air)': '横向间距（空中）', 'Parcel drop height': '包裹投放高度',
+        'Time for parcel drop': '包裹投放时间', 'Time for battery swap': '电池更换时间',
+        'Time for payload swap': '载荷更换时间', 'Operating hours per day': '每日运行小时数',
+        'Analysis start year': '分析开始年份', 'Analysis end year': '分析结束年份',
+        'Current analysis year': '当前分析年份',
+        'Drone mass': '无人机质量', 'Ascending power': '上升功率', 'Descending power': '下降功率',
+        'Rotor diameter': '旋翼直径', 'Number of drone rotors': '旋翼数量',
+        'Cruise speed': '巡航速度', 'Altitude in flight': '飞行高度',
+        'Front blueprint length': '前视图长度', 'Front blueprint width': '前视图宽度',
+        'Length of the wing': '机翼长度', 'Width of the wing': '机翼宽度',
+        'Nominal voltage of battery': '电池标称电压', 'Capacity of battery': '电池容量',
+        'Power from DC charger': '直流充电器功率', 'State of Charge change': '充电状态变化',
+        'Lifetime battery cycles': '电池寿命循环次数', 'Rotor lifespan': '旋翼寿命',
+        'Motor lifespan': '电机寿命', 'Payload door actuator lifespan': '舱门执行器寿命',
+        'Spare drones': '备用无人机', 'Greenfield land fraction': '绿地比例',
+        'Cost of ecology loss on greenfield': '绿地生态损失成本',
+        'Embodied carbon in steel': '钢的隐含碳', 'Mass of steel in drone': '无人机中钢的质量',
+        'Embodied carbon in Nylon 6': '尼龙6的隐含碳', 'Mass of Nylon 6 in drone': '无人机中尼龙6的质量',
+        'Embodied carbon in aluminium': '铝的隐含碳', 'Mass of aluminium in drone': '无人机中铝的质量',
+        'Embodied carbon in magnesium': '镁的隐含碳', 'Mass of magnesium in drone': '无人机中镁的质量',
+        'Embodied carbon in copper': '铜的隐含碳', 'Mass of copper in drone': '无人机中铜的质量',
+        'Embodied carbon in carbon fibre': '碳纤维的隐含碳', 'Mass of carbon fibre in drone': '无人机中碳纤维的质量',
+        'Embodied carbon in fibreglass': '玻璃纤维的隐含碳', 'Mass of fibreglass in drone': '无人机中玻璃纤维的质量',
+        'Embodied carbon in battery': '电池的隐含碳', 'Mass of battery in drone': '无人机中电池的质量',
+        'Van mass (GVW)': '货车质量（总重）', 'Usable battery capacity': '可用电池容量',
+        'Delivery driver salary': '送货司机工资', 'UKTAG congestion cost': 'UKTAG拥堵成本',
+        'Factor of friction during braking': '制动摩擦系数',
+        'PM2.5 emissions factor HDV road wear': 'PM2.5排放因子道路磨损',
+        'TSP emissions factor HDV road wear': 'TSP排放因子道路磨损',
+        'Start load factor': '初始负载系数', 'End load factor': '最终负载系数',
+        'TSP brake wear factor': 'TSP制动磨损因子', 'TSP tyre wear factor': 'TSP轮胎磨损因子',
+        'Acceleration time': '加速时间', 'Deceleration time': '减速时间',
+        'Van cruise speed': '货车巡航速度', 'Van battery lifespan': '货车电池寿命',
+        'Van tyre lifespan': '货车轮胎寿命', 'Van brake pad lifespan': '货车刹车片寿命',
+        'Number of parcels in van': '货车中的包裹数', 'BHH constant': 'BHH常数',
+        'Distance depot to cluster': '仓库到集群距离', 'Operational radius of van': '货车运营半径',
+        'Auxiliary power': '辅助功率', 'Van shape coefficient': '货车形状系数',
+        'Van width': '货车宽度', 'Van height': '货车高度',
+        'Power efficiency grid to charger': '电网到充电器效率',
+        'Power efficiency charger to battery': '充电器到电池效率',
+        'Power efficiency battery to aero': '电池到气动效率',
+        'Power efficiency van drive': '货车驱动效率',
+        'Power efficiency regenerative': '再生制动效率',
+        'Cost of carbon': '碳成本', 'Battery redundancy factor': '冗余系数',
+        'Grid carbon intensity': '电网碳强度',
+        'PM10 proportional damage cost': 'PM10比例损害成本', 'Cost of PM2.5 per kg': 'PM2.5每千克成本',
+        'Coefficient of lift': '升力系数', 'Coefficient of drag': '阻力系数',
+        'Rolling resistance': '滚动阻力',
+        'Share this scenario by email': '通过电子邮件分享此方案',
+        'Year': '年份', 'Year (5-yr intervals)': '年份（5年间隔）', 'Category': '类别',
+        'Equations': '方程式',
+        'About this simulator': '关于本模拟器',
+        'Click here to view the thesis work': '点击此处查看论文工作',
+        '£ / year': '£ / 年',
+        '£ / parcel': '£ / 包裹',
+        '£ / day': '£ / 天',
+        '£ / route': '£ / 路线',
+        'Environmental Externality Breakdown per Route\u2011Day': '每条路线\u2011天环境外部性分解',
+        'BASELINE (GROUND DELIVERY VAN)': '基准（地面送货车）'
+      }
+    };
+
+    let currentLang = 'en';
+
+    function tr(key) {
+      const dict = T[currentLang] || T.en;
+      return dict[key] || T.en[key] || key;
+    }
+
+    var aboutBodyT = {
+      en: document.getElementById('aboutModalBody') ? document.getElementById('aboutModalBody').innerHTML : '',
+      fr: '<p style="margin-bottom:12px">Issue de la mort d\'Ella Adoo-Kissi-Debrah, première personne à avoir la pollution atmosphérique inscrite sur son certificat de décès en 2020, il est largement évident que la pollution de l\'air est devenue un fardeau écrasant pour la société et une cause majeure de mauvaise santé à l\'échelle internationale. Plus précisément, à Londres, ce problème est illustré par des dépassements persistants des directives de qualité de l\'air de l\'OMS, les transports représentant environ 50 % des émissions de NOx et des contributions significatives à la pollution par les particules.</p><p style="margin-bottom:12px">Face à ce fardeau sociétal, une nouvelle technologie est née pour absorber la congestion du réseau attribuée au commerce électronique : les véhicules aériens sans pilote. En transférant des portions de notre réseau de transport dans les airs, les voies seront plus librement disponibles pour les transports en commun et les déplacements de passagers.</p><p style="margin-bottom:12px"><strong>Qu\'est-ce que l\'UAM-ECS ?</strong><br/>Le simulateur de coût environnemental de la mobilité aérienne urbaine (UAM-ECS) est un outil de décision interactif conçu pour évaluer les implications environnementales de l\'introduction d\'aéronefs électriques à décollage et atterrissage verticaux (eVTOL) pour les itinéraires logistiques urbains.</p><p style="margin-bottom:12px"><strong>Comment ça marche ?</strong><br/>L\'UAM-ECS utilise une approche de modélisation paramétrique qui intègre les contraintes opérationnelles réelles et les paramètres clés dans divers domaines.</p><p style="margin-bottom:12px"><strong>Fondement de la recherche</strong><br/>Cet outil est fondé sur des recherches de thèse menées à la Tandon School of Engineering de l\'Université de New York en collaboration avec le MIT JTL-Urban Mobility Lab.</p><p style="margin-bottom:8px"><strong>À propos du développeur</strong><br/>Jasmine Brittan est étudiante en master de systèmes de transport, avec une concentration en ingénierie des systèmes de mobilité.</p>',
+      de: '<p style="margin-bottom:12px">Ausgehend vom Tod von Ella Adoo-Kissi-Debrah, die als erste Person Luftverschmutzung auf ihrer Sterbeurkunde aufgeführt hatte (2020), ist es weithin offensichtlich, dass Luftverschmutzung zu einer erdrückenden Belastung für die Gesellschaft geworden ist. Insbesondere in London wird dieses Problem durch anhaltende Überschreitungen der WHO-Luftqualitätsrichtlinien verdeutlicht, wobei der Verkehr etwa 50 % der NOx-Emissionen ausmacht.</p><p style="margin-bottom:12px">Angesichts dieser gesellschaftlichen Belastung ist eine neue Technologie entstanden, um die Netzwerküberlastung durch E-Commerce aufzufangen: unbemannte Luftfahrzeuge.</p><p style="margin-bottom:12px"><strong>Was ist UAM-ECS?</strong><br/>Der Urban Air Mobility Environmental Cost Simulator (UAM-ECS) ist ein interaktives Entscheidungstool zur Bewertung der Umweltauswirkungen der Einführung von eVTOL-Flugzeugen für urbane Logistikrouten.</p><p style="margin-bottom:12px"><strong>Wie funktioniert es?</strong><br/>UAM-ECS verwendet einen parametrischen Modellierungsansatz, der reale Betriebsbeschränkungen und Schlüsselparameter integriert.</p><p style="margin-bottom:12px"><strong>Forschungsgrundlage</strong><br/>Dieses Tool basiert auf Forschungsarbeiten an der NYU Tandon School of Engineering in Zusammenarbeit mit dem MIT JTL-Urban Mobility Lab.</p><p style="margin-bottom:8px"><strong>Über die Entwicklerin</strong><br/>Jasmine Brittan ist Masterstudentin für Transportsysteme mit Schwerpunkt Mobilitätssystemtechnik.</p>',
+      es: '<p style="margin-bottom:12px">A raíz de la muerte de Ella Adoo-Kissi-Debrah, la primera persona en tener la contaminación del aire registrada en su certificado de defunción en 2020, es ampliamente evidente que la contaminación del aire se ha convertido en una carga aplastante para la sociedad. En Londres, este problema se ejemplifica con las superaciones persistentes de las directrices de calidad del aire de la OMS, con el transporte representando aproximadamente el 50% de las emisiones de NOx.</p><p style="margin-bottom:12px">Ante esta grave carga social, ha surgido una nueva tecnología para absorber la congestión de la red atribuida al comercio electrónico: los vehículos aéreos no tripulados.</p><p style="margin-bottom:12px"><strong>¿Qué es UAM-ECS?</strong><br/>El Simulador de Costes Ambientales de Movilidad Aérea Urbana (UAM-ECS) es una herramienta de decisión interactiva diseñada para evaluar las implicaciones ambientales de la introducción de aeronaves eVTOL para rutas logísticas urbanas.</p><p style="margin-bottom:12px"><strong>¿Cómo funciona?</strong><br/>UAM-ECS emplea un enfoque de modelado paramétrico que integra restricciones operacionales reales y parámetros clave.</p><p style="margin-bottom:12px"><strong>Base de investigación</strong><br/>Esta herramienta se basa en investigación de tesis realizada en la NYU Tandon School of Engineering en colaboración con el MIT JTL-Urban Mobility Lab.</p><p style="margin-bottom:8px"><strong>Sobre la desarrolladora</strong><br/>Jasmine Brittan es estudiante de maestría en Sistemas de Transporte con concentración en Ingeniería de Sistemas de Movilidad.</p>',
+      hi: '<p style="margin-bottom:12px">एला अडू-किस्सी-डेब्रा की मृत्यु से उत्पन्न, जो 2020 में अपने मृत्यु प्रमाणपत्र पर वायु प्रदूषण दर्ज कराने वाली पहली व्यक्ति थीं, यह व्यापक रूप से स्पष्ट है कि वायु प्रदूषण समाज पर एक भारी बोझ बन गया है। विशेष रूप से लंदन में, परिवहन NOx उत्सर्जन का लगभग 50% हिस्सा है।</p><p style="margin-bottom:12px">इस गंभीर सामाजिक बोझ को देखते हुए, ई-कॉमर्स से होने वाली नेटवर्क भीड़ को कम करने के लिए एक नई तकनीक उत्पन्न हुई है: मानवरहित हवाई वाहन।</p><p style="margin-bottom:12px"><strong>UAM-ECS क्या है?</strong><br/>शहरी वायु गतिशीलता पर्यावरणीय लागत सिम्युलेटर (UAM-ECS) शहरी लॉजिस्टिक मार्गों के लिए eVTOL विमानों की शुरूआत के पर्यावरणीय प्रभावों का मूल्यांकन करने के लिए एक इंटरैक्टिव निर्णय उपकरण है।</p><p style="margin-bottom:12px"><strong>यह कैसे काम करता है?</strong><br/>UAM-ECS एक पैरामीट्रिक मॉडलिंग दृष्टिकोण का उपयोग करता है।</p><p style="margin-bottom:12px"><strong>शोध आधार</strong><br/>यह उपकरण NYU Tandon School of Engineering में MIT JTL-Urban Mobility Lab के सहयोग से किए गए शोध पर आधारित है।</p><p style="margin-bottom:8px"><strong>डेवलपर के बारे में</strong><br/>जैस्मीन ब्रिटन परिवहन प्रणालियों में एमएस छात्रा हैं।</p>',
+      zh: '<p style="margin-bottom:12px">源于Ella Adoo-Kissi-Debrah的去世——她是2020年首位在死亡证明上列出空气污染的人——空气污染已成为社会的沉重负担和国际上导致健康不良的主要原因。特别是在伦敦，交通约占NOx排放量的50%。</p><p style="margin-bottom:12px">面对这一严峻的社会负担，一项新技术应运而生以吸收电子商务带来的网络拥堵：无人驾驶飞行器。</p><p style="margin-bottom:12px"><strong>什么是UAM-ECS？</strong><br/>城市空中交通环境成本模拟器（UAM-ECS）是一个交互式决策工具，旨在评估为城市物流路线引入电动垂直起降（eVTOL）飞行器的环境影响。</p><p style="margin-bottom:12px"><strong>它是如何工作的？</strong><br/>UAM-ECS采用参数化建模方法，整合了现实世界的运营约束和关键参数。</p><p style="margin-bottom:12px"><strong>研究基础</strong><br/>该工具基于纽约大学Tandon工程学院与MIT JTL-Urban Mobility Lab合作进行的论文研究。</p><p style="margin-bottom:8px"><strong>关于开发者</strong><br/>Jasmine Brittan是交通系统硕士生，专注于移动系统工程。</p>'
+    };
+
+    function applyTranslations() {
+      // Slider labels
+      document.querySelectorAll('.slider-label').forEach(el => {
+        const key = el.getAttribute('data-i18n') || el.textContent.trim();
+        if (!el.getAttribute('data-i18n')) el.setAttribute('data-i18n', key);
+        el.textContent = tr(key);
+      });
+      // Section titles
+      document.querySelectorAll('.slider-group-title b').forEach(el => {
+        const key = el.getAttribute('data-i18n') || el.textContent.trim();
+        if (!el.getAttribute('data-i18n')) el.setAttribute('data-i18n', key);
+        el.textContent = tr(key);
+      });
+      // Menu items
+      document.querySelectorAll('#graphsMenu > .menu-label').forEach(el => { el.textContent = tr('Graphs') + ' \u25be'; });
+      document.querySelectorAll('#helpMenu > .menu-label').forEach(el => { el.textContent = tr('Help') + ' \u25be'; });
+      document.querySelectorAll('#simMenu > .menu-label').forEach(el => { el.textContent = tr('Simulation') + ' \u25be'; });
+      // Graph dropdown items
+      graphsDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+        const g = item.getAttribute('data-graph');
+        const cfg = graphConfig[g];
+        if (cfg) {
+          const tick = item.querySelector('.dropdown-tick');
+          const tickHtml = tick ? tick.outerHTML : '';
+          item.innerHTML = tr(cfg.title) + ' ' + tickHtml;
+        }
+      });
+      // Buttons
+      document.getElementById('toggleTonnes').textContent = tr('Show the economic cost in £');
+      document.getElementById('toggleCost').textContent = tr('Show the environmental cost in £');
+      document.getElementById('shareBtn').textContent = tr('Share Scenario');
+      const shareLabel = document.querySelector('.share-dropdown-label');
+      if (shareLabel) shareLabel.textContent = tr('Share this scenario by email');
+      // Report / About
+      const reportItem = document.getElementById('reportIssueItem');
+      if (reportItem) reportItem.textContent = tr('Report an Issue');
+      const aboutItem = document.getElementById('aboutItem');
+      if (aboutItem) aboutItem.textContent = tr('About');
+      // KPI text
+      document.getElementById('tempSmallCost').textContent = tr('of environmental costs by switching the delivery route to a drone fleet in 2027');
+      document.getElementById('tempSmallTonnes').textContent = tr('of economic costs by switching the delivery route to a drone fleet in 2027');
+      // Equations menu
+      var eqMenuLabel = document.querySelector('#eqMenu .menu-label');
+      if (eqMenuLabel) eqMenuLabel.textContent = tr('Equations');
+      // About modal title + body
+      var aboutTitle = document.getElementById('aboutModalTitle');
+      if (aboutTitle) aboutTitle.textContent = tr('About this simulator');
+      var aboutBody = document.getElementById('aboutModalBody');
+      if (aboutBody && aboutBodyT[currentLang]) aboutBody.innerHTML = aboutBodyT[currentLang];
+      // Thesis button
+      var thesisBtn = document.getElementById('thesisBtn');
+      if (thesisBtn) thesisBtn.textContent = tr('Click here to view the thesis work');
+      // Legend badges (refresh)
+      var legendEls = document.querySelectorAll('.badge-baseline');
+      legendEls.forEach(function(el) { el.textContent = tr('BASELINE (GROUND DELIVERY VAN)'); });
+      var legendDrone = document.querySelectorAll('.badge-current');
+      legendDrone.forEach(function(el) { el.textContent = tr('DRONE DELIVERIES'); });
+      // Refresh graph titles/axes
+      configureGraphSlot('left', leftGraph);
+      configureGraphSlot('right', rightGraph);
+      recalcHeadline();
+    }
+
+    langDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const lang = item.getAttribute('data-lang');
+        const txt = item.textContent;
+        langLabel.textContent = txt + ' \u25be';
+        currentLang = lang;
+        applyTranslations();
+      });
+    });
+
+    function drawGrid(chartEl, slot, graphId) {
+      const svg = chartEl.querySelector('.chart-grid');
+      const width = chartEl.clientWidth || 320;
+      const height = chartEl.clientHeight || 180;
+      svg.setAttribute('width', width);
+      svg.setAttribute('height', height);
+
+      const paddingLeft = 45;
+      const paddingRight = 10;
+      const paddingTop = 10;
+      const paddingBottom = 40;
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      svg.innerHTML = '';
+
+      const isDonut = graphId === 'embodiedDonut';
+      const nY = 4;
+      const nX = (graphId === 'extBreakdown' || graphId === 'routeCompletion') ? 4 : 5;
+      if (!isDonut) {
+        for (let i = 0; i <= nY; i++) {
+          const y = paddingTop + (i / nY) * (height - paddingTop - paddingBottom);
+          const line = document.createElementNS(svgNS, 'line');
+          line.setAttribute('x1', paddingLeft);
+          line.setAttribute('x2', width - paddingRight);
+          line.setAttribute('y1', y);
+          line.setAttribute('y2', y);
+          line.setAttribute('class', i === nY ? 'axis' : '');
+          svg.appendChild(line);
+        }
+        for (let j = 0; j <= nX; j++) {
+          const x = paddingLeft + (j / nX) * (width - paddingLeft - paddingRight);
+          const line = document.createElementNS(svgNS, 'line');
+          line.setAttribute('x1', x);
+          line.setAttribute('x2', x);
+          line.setAttribute('y1', paddingTop);
+          line.setAttribute('y2', height - paddingBottom);
+          line.setAttribute('class', j === 0 ? 'axis' : '');
+          svg.appendChild(line);
+        }
+      }
+
+      const xTicksDiv = slot === 'left' ? document.getElementById('leftXTicks') : document.getElementById('rightXTicks');
+      const yTicksDiv = slot === 'left' ? document.getElementById('leftYTicks') : document.getElementById('rightYTicks');
+      xTicksDiv.innerHTML = '';
+      yTicksDiv.innerHTML = '';
+
+      let xLabels, yLabels;
+      if (graphId === 'extBreakdown') {
+        xLabels = ['Battery', 'Embodied\nCarbon', 'Land', 'Noise', 'Particulate\nMatter'];
+        yLabels = ['0', '25', '50', '75', '100'];
+      } else if (graphId === 'embodiedDonut') {
+        xLabels = [];
+        yLabels = [];
+      } else if (graphId === 'routeCompletion') {
+        xLabels = ['UAM', 'Van'];
+        yLabels = ['0', '50', '100', '150', '200'];
+      } else if (graphId === 'envCostPerRoute') {
+        xLabels = ['2027', '2032', '2037', '2042', '2047', '2052'];
+        yLabels = ['0', '25', '50', '75', '100'];
+      } else {
+        xLabels = ['2027', '2032', '2037', '2042', '2047', '2052'];
+        yLabels = ['0', '25', '50', '75', '100'];
+      }
+      // For bar charts, center labels under bars using space-evenly
+      if (graphId === 'extBreakdown' || graphId === 'routeCompletion') {
+        xTicksDiv.style.justifyContent = 'space-evenly';
+      } else {
+        xTicksDiv.style.justifyContent = 'space-between';
+      }
+      xLabels.forEach(l => {
+        const span = document.createElement('span');
+        if (l.includes('\n')) {
+          l.split('\n').forEach((part, pi) => {
+            if (pi > 0) span.appendChild(document.createElement('br'));
+            span.appendChild(document.createTextNode(part));
+          });
+        } else {
+          span.textContent = l;
+        }
+        span.style.textAlign = 'center';
+        xTicksDiv.appendChild(span);
+      });
+      yLabels.forEach(l => {
+        const span = document.createElement('span');
+        span.textContent = l;
+        yTicksDiv.appendChild(span);
+      });
+
+    }
+
+    function updateAllGraphs(impactTripCO2eq, impactTripDollar, baselineDollar) {
+      drawSeriesForChart(leftChart, leftGraph, impactTripCO2eq, impactTripDollar, baselineDollar, 'left');
+      drawSeriesForChart(rightChart, rightGraph, impactTripCO2eq, impactTripDollar, baselineDollar, 'right');
+    }
+
+    function drawSeriesForChart(chartEl, graphId, impactTripCO2eq, impactTripDollar, baselineDollar, slot) {
+      const svg = chartEl.querySelector('.chart-grid');
+      if (!svg) return;
+      const width = chartEl.clientWidth || 320;
+      const height = chartEl.clientHeight || 180;
+      const paddingLeft = 45;
+      const paddingRight = 10;
+      const paddingTop = 10;
+      const paddingBottom = 40;
+      const svgNS = 'http://www.w3.org/2000/svg';
+
+      // Remove old series elements
+      svg.querySelectorAll('.series').forEach(p => p.remove());
+      svg.querySelectorAll('.bar-el').forEach(p => p.remove());
+      svg.querySelectorAll('.donut-el').forEach(p => p.remove());
+      svg.querySelectorAll('.dot-el').forEach(p => p.remove());
+      // Remove old tooltip overlay if any
+      const oldTip = chartEl.querySelector('.donut-tooltip');
+      if (oldTip) oldTip.remove();
+
+      const years6 = [2027, 2032, 2037, 2042, 2047, 2052];
+      const plotW = width - paddingLeft - paddingRight;
+      const plotH = height - paddingTop - paddingBottom;
+      const xs = years6.map((y, i) => paddingLeft + (i / (years6.length - 1)) * plotW);
+
+      function drawLine(values, color, isBaseline) {
+        const allVals = values;
+        const maxVal = Math.max(...allVals, 0.001);
+        const d = allVals.map((v, idx) => {
+          const x = xs[idx];
+          const f = v / maxVal;
+          const y = height - paddingBottom - f * plotH;
+          return (idx === 0 ? 'M' : 'L') + x + ' ' + y;
+        }).join(' ');
+        const path = document.createElementNS(svgNS, 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('stroke', color);
+        path.setAttribute('stroke-width', isBaseline ? '2.2' : '2');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('class', 'series');
+        svg.appendChild(path);
+      }
+
+      const N_N = sv('numNodesSlider');
+
+      if (graphId === 'annualEnvCost') {
+        const droneAnnual = impactTripDollar * 365;
+        const vanAnnual = baselineDollar * 365;
+        const droneVals = years6.map((y, idx) => {
+          const t = idx / (years6.length - 1);
+          return droneAnnual * (1 - 0.15 * t);
+        });
+        const vanVals = years6.map(() => vanAnnual);
+        drawLine(vanVals, '#333333', true);
+        drawLine(droneVals, '#008fd5', false);
+
+      } else if (graphId === 'envCostPerRoute') {
+        const dronePerParcel = impactTripDollar;
+        const vanPerParcel = baselineDollar;
+        const droneVals = years6.map((y, idx) => {
+          const t = idx / (years6.length - 1);
+          return dronePerParcel * N_N * (1 - 0.1 * t);
+        });
+        const vanVals = years6.map(() => vanPerParcel * N_N);
+        drawLine(vanVals, '#333333', true);
+        drawLine(droneVals, '#008fd5', false);
+
+      } else if (graphId === 'extBreakdown') {
+        // Hardcoded material carbon constants (thesis v32)
+        const C_b_mat = 14, m_b_mat = 12, N_lc_const = 1500;
+        const c_carbon_v = sv('carbonPriceSlider') || 0.049;
+        const batCost = (C_b_mat * m_b_mat) / Math.max(N_lc_const, 1) * c_carbon_v;
+        const embodiedCost = impactTripCO2eq * 0.3 * c_carbon_v;
+        const landCost = sv('greenfieldSlider') * sv('ecoCostSlider') * 0.0001;
+        const noiseCost = impactTripCO2eq * 0.05;
+        const healthCost = 0.0205 * 114411 * 0.001;
+        const cats = [batCost, embodiedCost, landCost, noiseCost, healthCost];
+        const maxCat = Math.max(...cats, 0.001);
+        const colors = ['#008fd5', '#ff9933', '#33aa55', '#cc33aa', '#cc3333'];
+        const nBars = cats.length;
+        const gap = plotW / (nBars + 1);
+        const barW = gap * 0.6;
+        cats.forEach((val, i) => {
+          const cx = paddingLeft + gap * (i + 1);
+          const x = cx - barW / 2;
+          const barH = (val / maxCat) * plotH;
+          const y = height - paddingBottom - barH;
+          const rect = document.createElementNS(svgNS, 'rect');
+          rect.setAttribute('x', x);
+          rect.setAttribute('y', y);
+          rect.setAttribute('width', barW);
+          rect.setAttribute('height', barH);
+          rect.setAttribute('fill', colors[i]);
+          rect.setAttribute('class', 'bar-el');
+          svg.appendChild(rect);
+        });
+
+      } else if (graphId === 'embodiedDonut') {
+        // Hardcoded material carbon × mass (thesis v32)
+        const materials = [
+          { name: 'CFRP', val: 35 * 8.5, color: '#008fd5' },
+          { name: 'Battery', val: 14 * 12, color: '#ff9933' },
+          { name: 'Aluminium', val: 13.1 * 3, color: '#33aa55' },
+          { name: 'Magnesium', val: 41.26 * 0.3, color: '#cc33aa' },
+          { name: 'Copper', val: 3.81 * 2.5, color: '#cc3333' },
+          { name: 'Fibreglass', val: 8.1 * 2.5, color: '#6699cc' },
+          { name: 'Nylon', val: 9.14 * 1.5, color: '#99cc33' },
+          { name: 'Steel', val: 2.45 * 1, color: '#777777' }
+        ];
+        const total = materials.reduce((s, m) => s + m.val, 0) || 1;
+        const cx = width / 2;
+        const cy = height / 2;
+        const R = Math.min(width, height) * 0.42;
+        const r = R * 0.55;
+        let startAngle = -Math.PI / 2;
+
+        // Tooltip div
+        const tooltip = document.createElement('div');
+        tooltip.className = 'donut-tooltip';
+        tooltip.style.cssText = 'position:absolute;display:none;background:rgba(0,0,0,0.85);color:#fff;padding:6px 10px;border-radius:4px;font-size:11px;pointer-events:none;z-index:100;white-space:nowrap;';
+        chartEl.appendChild(tooltip);
+
+        materials.forEach(m => {
+          const angle = (m.val / total) * Math.PI * 2;
+          const endAngle = startAngle + angle;
+          const largeArc = angle > Math.PI ? 1 : 0;
+          const x1o = cx + R * Math.cos(startAngle), y1o = cy + R * Math.sin(startAngle);
+          const x2o = cx + R * Math.cos(endAngle), y2o = cy + R * Math.sin(endAngle);
+          const x1i = cx + r * Math.cos(endAngle), y1i = cy + r * Math.sin(endAngle);
+          const x2i = cx + r * Math.cos(startAngle), y2i = cy + r * Math.sin(startAngle);
+          const d = 'M' + x1o + ',' + y1o +
+            ' A' + R + ',' + R + ' 0 ' + largeArc + ' 1 ' + x2o + ',' + y2o +
+            ' L' + x1i + ',' + y1i +
+            ' A' + r + ',' + r + ' 0 ' + largeArc + ' 0 ' + x2i + ',' + y2i + ' Z';
+          const path = document.createElementNS(svgNS, 'path');
+          path.setAttribute('d', d);
+          path.setAttribute('fill', m.color);
+          path.setAttribute('stroke', '#fff');
+          path.setAttribute('stroke-width', '1.5');
+          path.setAttribute('class', 'donut-el');
+          path.style.cursor = 'pointer';
+          // Hover tooltip
+          const pct = ((m.val / total) * 100).toFixed(1);
+          path.addEventListener('mouseenter', function(e) {
+            tooltip.innerHTML = '<strong>' + m.name + '</strong><br>' + m.val.toFixed(1) + ' kg CO\u2082 (' + pct + '%)';
+            tooltip.style.display = 'block';
+          });
+          path.addEventListener('mousemove', function(e) {
+            const rect = chartEl.getBoundingClientRect();
+            tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+            tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+          });
+          path.addEventListener('mouseleave', function() {
+            tooltip.style.display = 'none';
+          });
+          svg.appendChild(path);
+          startAngle = endAngle;
+        });
+        // Center label
+        const txt = document.createElementNS(svgNS, 'text');
+        txt.setAttribute('x', cx);
+        txt.setAttribute('y', cy + 4);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('font-size', '12');
+        txt.setAttribute('font-weight', 'bold');
+        txt.setAttribute('fill', '#333');
+        txt.setAttribute('class', 'donut-el');
+        txt.textContent = total.toFixed(1) + ' kg CO\u2082';
+        svg.appendChild(txt);
+
+        // Populate donut legend
+        const legendEl = slot === 'left' ? leftLegend : rightLegend;
+        legendEl.innerHTML = '';
+        materials.forEach(m => {
+          const item = document.createElement('div');
+          item.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:2px;font-size:9px;text-transform:uppercase;letter-spacing:0.04em;border:1px solid ' + m.color + ';background:' + m.color + ';color:#fff;';
+          item.textContent = m.name;
+          legendEl.appendChild(item);
+        });
+
+      } else if (graphId === 'dailyEnvCost') {
+        const droneDailyCost = impactTripDollar * N_N;
+        const vanDailyCost = baselineDollar * N_N;
+        const droneVals = years6.map((y, idx) => {
+          const t = idx / (years6.length - 1);
+          return droneDailyCost * (1 - 0.12 * t);
+        });
+        const vanVals = years6.map(() => vanDailyCost);
+        drawLine(vanVals, '#333333', true);
+        drawLine(droneVals, '#008fd5', false);
+
+      } else if (graphId === 'routeCompletion') {
+        const uamEnergy = impactTripDollar * N_N * 0.6;
+        const uamMaint = impactTripDollar * N_N * 0.4;
+        const uamDriver = 0;
+        const vanEnergy = baselineDollar * N_N * 0.2;
+        const vanMaint = baselineDollar * N_N * 0.12;
+        const vanDriver = sv('driverSalarySlider') / 365;
+
+        const uamTotal = uamEnergy + uamMaint + uamDriver;
+        const vanTotal = vanEnergy + vanMaint + vanDriver;
+        const maxBar = Math.max(uamTotal, vanTotal, 1);
+
+        const barW = plotW * 0.2;
+        const xUAM = paddingLeft + plotW * 0.33 - barW / 2;
+        const xVan = paddingLeft + plotW * 0.67 - barW / 2;
+
+        function drawStackedBar(x, lower, upper, maxV) {
+          const lowerH = (lower / maxV) * plotH;
+          const upperH = (upper / maxV) * plotH;
+          const rLow = document.createElementNS(svgNS, 'rect');
+          rLow.setAttribute('x', x);
+          rLow.setAttribute('y', height - paddingBottom - lowerH);
+          rLow.setAttribute('width', barW);
+          rLow.setAttribute('height', lowerH);
+          rLow.setAttribute('fill', '#999999');
+          rLow.setAttribute('class', 'bar-el');
+          svg.appendChild(rLow);
+          if (upper > 0) {
+            const rUp = document.createElementNS(svgNS, 'rect');
+            rUp.setAttribute('x', x);
+            rUp.setAttribute('y', height - paddingBottom - lowerH - upperH);
+            rUp.setAttribute('width', barW);
+            rUp.setAttribute('height', upperH);
+            rUp.setAttribute('fill', '#ff9933');
+            rUp.setAttribute('class', 'bar-el');
+            svg.appendChild(rUp);
+          }
+        }
+        drawStackedBar(xUAM, uamEnergy + uamMaint, uamDriver, maxBar);
+        drawStackedBar(xVan, vanEnergy + vanMaint, vanDriver, maxBar);
+
+
+
+      } else if (graphId === 'capexPerRoute') {
+        const droneCapex = impactTripDollar * N_N * 1.5;
+        const vanCapex = baselineDollar * N_N * 2.0;
+        const droneVals = years6.map((y, idx) => {
+          const t = idx / (years6.length - 1);
+          return droneCapex * (1 - 0.2 * t);
+        });
+        const vanVals = years6.map((y, idx) => {
+          const t = idx / (years6.length - 1);
+          return vanCapex * (1 - 0.05 * t);
+        });
+        drawLine(vanVals, '#333333', true);
+        drawLine(droneVals, '#008fd5', false);
+      }
+    }
+
+    // <!-- Constraint dot: current max achievable value for each slider (societal/tech limits) -->
+    // Each entry maps sliderId -> constraintValue (the red dot position on the slider).
+    // These are arbitrary placeholder values representing present-year max feasibility.
+        const constraintMaxValues = {
+      numNodesSlider: 180,
+      ecoCostSlider: 50,
+      congCostSlider: 1.225, gridCISlider: 0.233, carbonPriceSlider: 0.049,
+      vanSpeedSlider: 13.4
+    };
+
+        const constraintMinValues = {
+      latSepSlider: 50, parcelDropTSlider: 30, altitudeSlider: 120,
+      driverSalarySlider: 23810
+    };
+
+    sliders.forEach(slider => {
+      const parent = slider.parentElement;
+      const container = document.createElement('div');
+      container.className = 'slider-track-container';
+      parent.insertBefore(container, slider);
+      container.appendChild(slider);
+
+      const maxVal = constraintMaxValues[slider.id];
+      if (maxVal !== undefined) {
+        const min = parseFloat(slider.min);
+        const max = parseFloat(slider.max);
+        const pct = ((maxVal - min) / (max - min)) * 100;
+        const clampedPct = Math.max(0, Math.min(100, pct));
+        const dot = document.createElement('div');
+        dot.className = 'constraint-dot';
+        dot.style.left = 'calc(' + clampedPct + '% - 4px)';
+        dot.title = 'Current max feasible: ' + maxVal;
+        container.appendChild(dot);
+      }
+
+      const minVal = constraintMinValues[slider.id];
+      if (minVal !== undefined) {
+        const min = parseFloat(slider.min);
+        const max = parseFloat(slider.max);
+        const pct = ((minVal - min) / (max - min)) * 100;
+        const clampedPct = Math.max(0, Math.min(100, pct));
+        const dot = document.createElement('div');
+        dot.className = 'constraint-dot-min';
+        dot.style.left = 'calc(' + clampedPct + '% - 4px)';
+        dot.title = 'Current min feasible: ' + minVal;
+        container.appendChild(dot);
+      }
+    });
+
+    // <!--Initialise-->
+    initialState = captureState();
+    currentState = captureState();
+    recalcHeadline();
+    updateUndoRedoButtons();
+    configureGraphSlot('left', leftGraph);
+    configureGraphSlot('right', rightGraph);
+
+    // Equations page
+    const mainContent = document.querySelector('.main');
+    const equationsPage = document.getElementById('equationsPage');
+    var equationsVisible = false;
+
+    function toggleEquationsPage(scrollToSection) {
+      equationsVisible = !equationsVisible;
+      const eqMenuLabel = document.querySelector('#eqMenu .menu-label');
+      if (equationsVisible) {
+        mainContent.style.display = 'none';
+        equationsPage.style.display = 'block';
+        eqMenuLabel.style.fontWeight = '700';
+        eqMenuLabel.style.borderBottom = '2px solid #0074c1';
+        updateEquations();
+        renderLatex();
+        if (scrollToSection) {
+          setTimeout(function() {
+            var sections = equationsPage.querySelectorAll('.eq-section');
+            for (var i = 0; i < sections.length; i++) {
+              var title = sections[i].querySelector('.eq-section-title span');
+              if (title && title.textContent.toLowerCase().indexOf(scrollToSection.toLowerCase()) !== -1) {
+                sections[i].classList.remove('collapsed');
+                sections[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                break;
+              }
+            }
+          }, 50);
+        }
+      } else {
+        mainContent.style.display = '';
+        equationsPage.style.display = 'none';
+        eqMenuLabel.style.fontWeight = '';
+        eqMenuLabel.style.borderBottom = '';
+      }
+    }
+
+    function updateEquations() {
+      function fmt(v, d) {
+        if (v === undefined || v === null || isNaN(v) || !isFinite(v)) return '\u2014';
+        return Number(v).toFixed(d);
+      }
+      function setV(id, v, d) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = fmt(v, d);
+      }
+      if (!window._sim) return;
+      var s = window._sim;
+
+      // Zone geometry
+      setV('eq_Atotal', s.A_total, 3);
+      setV('eq_davg', s.d_avg_km, 4);
+      setV('eq_Nz', s.N_z, 2);
+      setV('eq_nz', s.N_N, 0);
+
+      // Van physics
+      setV('eq_vst', s.P_c_van ? (s.P_c_van > 0 ? (sv_safe('vanSpeedSlider'))/2 : 0) : 0, 3);
+      // Prefer using computed values from _sim:
+      var v_c_v = (document.getElementById('vanSpeedSlider')||{}).value;
+      v_c_v = v_c_v ? parseFloat(v_c_v) : 0;
+      setV('eq_vst', v_c_v/2, 3);
+      var t_st = 10, t_stop = 10;
+      setV('eq_aacc', v_c_v/t_st, 4);
+      setV('eq_adec', v_c_v/t_stop, 4);
+      setV('eq_Afvan', s.A_f_van, 4);
+      setV('eq_Pst', s.P_st_v, 1);
+      setV('eq_Pcvan', s.P_c_van, 1);
+      setV('eq_Pstop', s.P_stop_v, 1);
+      setV('eq_Ln', s.L_n, 3);
+      setV('eq_Etd', s.E_td_van, 1);
+
+      // Van Env
+      setV('eq_ecenergyv', s.ec_energy_v, 4);
+      setV('eq_eccong', s.ec_cong_v, 4);
+      setV('eq_ecPM', s.ec_PM_v, 4);
+      setV('eq_ecnoisev', s.ec_noise_v, 4);
+      setV('eq_ectyre', s.ec_tyre, 4);
+      setV('eq_ecbrake', s.ec_brake, 4);
+      setV('eq_ecbatv', s.ec_bat_v, 4);
+      setV('eq_vanenv', s.van_env, 2);
+
+      // Van OPEX
+      setV('eq_Celecv', s.C_elec_v, 4);
+      setV('eq_Ctyr', s.C_tyr, 4);
+      setV('eq_Cbr', s.C_br, 4);
+      setV('eq_Cbatv', s.C_bat_opex_v, 4);
+      setV('eq_Cds', s.C_ds_day, 2);
+      setV('eq_Cwaitv', s.C_wait_v, 4);
+      setV('eq_vantotal', s.van_total, 2);
+      setV('eq_vanpp', s.van_pp, 4);
+
+      // Drone physics
+      setV('eq_Wd', s.W_d, 2);
+      setV('eq_Adisk', s.A_disk, 4);
+      setV('eq_Ph', s.P_h, 1);
+      setV('eq_Aw', s.A_w, 4);
+      setV('eq_Afront', s.A_front, 4);
+      setV('eq_va', s.v_a, 4);
+      setV('eq_vd', s.v_d, 4);
+      setV('eq_Pc', s.P_c_drone, 1);
+
+      // Drone trip timing
+      setV('eq_ta1', s.t_a1, 2);
+      setV('eq_tc1', s.t_c1, 2);
+      setV('eq_td1', s.t_d1, 2);
+      setV('eq_ta2', s.t_a2, 2);
+      setV('eq_tc2', s.t_c2, 2);
+      setV('eq_td2', s.t_d2, 2);
+      setV('eq_tt', s.t_t, 2);
+      setV('eq_tfb', s.t_fb, 2);
+
+      // Drone energy & battery
+      setV('eq_Evert', s.E_vert, 2);
+      setV('eq_Ecd', s.E_cruise_d, 2);
+      setV('eq_Etrip', s.E_trip, 2);
+      setV('eq_Egrid', s.E_grid, 2);
+      setV('eq_Eb', s.E_b, 1);
+      setV('eq_Eu', s.E_u, 1);
+      setV('eq_Ntc', s.N_tc, 0);
+      setV('eq_tchd', s.t_ch_d, 4);
+      setV('eq_Ntrips', s.N_trips, 1);
+
+      // Fleet & vertiport
+      setV('eq_F', s.F, 0);
+      setV('eq_Nb', s.N_b, 0);
+      setV('eq_Nchday', s.N_ch_day, 4);
+      setV('eq_Drb', s.D_rb_days, 1);
+      setV('eq_Drby', s.D_rb_yr, 0);
+      setV('eq_Avd', s.A_vd, 2);
+      setV('eq_Av', s.A_v, 2);
+
+      // Drone env
+      setV('eq_cenergy', s.c_energy_d, 4);
+      setV('eq_crbd', s.c_rb_day, 4);
+      setV('eq_ecrd', s.ec_rd, 4);
+      setV('eq_ecmd', s.ec_md, 4);
+      setV('eq_ecdd', s.ec_dd, 4);
+      setV('eq_ecfleet', s.ec_fleet_day, 4);
+      setV('eq_ecgreen', s.ec_green, 4);
+      setV('eq_ecnoised', s.ec_noise_d, 4);
+      setV('eq_droneenv', s.drone_env, 2);
+
+      // Drone OPEX
+      var c_e = (document.getElementById('elecPriceSlider')||{}).value;
+      var c_g = (document.getElementById('greenTariffSlider')||{}).value;
+      var p_g = (document.getElementById('greenFracSlider')||{}).value;
+      c_e = c_e ? parseFloat(c_e) : 0;
+      c_g = c_g ? parseFloat(c_g) : 0;
+      p_g = p_g ? parseFloat(p_g) : 0;
+      setV('eq_cblend', (1-p_g)*c_e + p_g*c_g, 4);
+      setV('eq_Celecd', s.C_elec_d, 4);
+      setV('eq_Cbatrep', s.C_bat_rep, 4);
+      setV('eq_Crot', s.C_rot, 4);
+      setV('eq_Cmot', s.C_mot, 4);
+      setV('eq_Cpd', s.C_pd, 4);
+      setV('eq_Cwaitd', s.C_wait_d, 4);
+      setV('eq_droneopex', s.drone_opex, 2);
+
+      // Drone CAPEX
+      setV('eq_Cfleet', s.C_fleet_amort, 4);
+      setV('eq_CbatAmort', s.C_bat_amort, 4);
+      setV('eq_Cvamort', s.C_v_amort, 4);
+      setV('eq_Cvoday', s.C_vo_day, 4);
+      setV('eq_dronecapex', s.drone_capex, 2);
+
+      // Summary
+      setV('eq_sumVanPP', s.van_pp, 4);
+      setV('eq_sumDroneOpexPP', s.drone_opex_pp, 4);
+      setV('eq_sumDroneFullPP', s.drone_full_pp, 4);
+
+      // Constraints - mark violated rows
+      var cs = s.constraints || {};
+      function setConstr(id, ok, valText) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = valText;
+        el.style.color = ok ? '#0074c1' : '#cc0000';
+        el.style.fontWeight = ok ? '600' : '700';
+        var row = document.getElementById(id + '_row');
+        if (row) {
+          if (!ok) row.classList.add('eq-violated');
+          else row.classList.remove('eq-violated');
+        }
+      }
+      setConstr('eq_C1', cs.C1, fmt(s.C1_val,1) + ' / ' + fmt(s.C1_req,0));
+      setConstr('eq_C2', cs.C2, fmt(s.F,0) + ' / ' + fmt(s.C2_max,1));
+      setConstr('eq_C3', cs.C3, fmt(s.C3_val,3) + ' km / 12 km');
+      setConstr('eq_C4', cs.C4, fmt(s.C4_val,1) + ' Wh / ' + fmt(s.C4_max,1) + ' Wh');
+      setConstr('eq_C5', cs.C5, fmt(s.L_cruise_val,1) + ' dB / ' + fmt(s.L_thresh_val,1) + ' dB');
+      setConstr('eq_C6', cs.C6, 'OK (default N_pad)');
+      setConstr('eq_C7', cs.C7, fmt(s.p_g_val,2));
+      setConstr('eq_C8', cs.C8, fmt(s.F,0) + ' >= 1');
+
+      function sv_safe(id) {
+        var el = document.getElementById(id);
+        return el ? parseFloat(el.value) : 0;
+      }
+    }
+
+    // KaTeX rendering
+    var latexRendered = false;
+    function renderLatex() {
+      if (latexRendered || typeof katex === 'undefined') return;
+      document.querySelectorAll('.eq-formula[data-latex]').forEach(function(el) {
+        try {
+          katex.render(el.getAttribute('data-latex'), el, { throwOnError: false, displayMode: false });
+        } catch (e) { el.textContent = el.getAttribute('data-latex'); }
+      });
+      latexRendered = true;
+    }
+
+
+    window.addEventListener('load', adjustKPIHeight);
+    setTimeout(adjustKPIHeight, 100);
+  </script>
+</body>
+</html>
