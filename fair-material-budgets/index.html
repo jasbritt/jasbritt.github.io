@@ -119,7 +119,7 @@ footer{margin:50px 0 60px;font-size:13px;color:var(--muted);max-width:90ch}
     <div class="chart wide"><h4>Every material against every limit</h4>
       <div class="tw"><table class="hm" id="tHeat"></table></div>
       <div class="legend" style="margin-top:10px"><span><i style="background:color-mix(in srgb,var(--good) 30%,#fff)"></i>Within budget</span><span><i style="background:color-mix(in srgb,var(--crit) 30%,#fff)"></i>Up to 2×</span><span><i style="background:color-mix(in srgb,var(--crit) 60%,#fff)"></i>2 to 10×</span><span><i style="background:color-mix(in srgb,var(--crit) 90%,#fff)"></i>Over 10×</span><span><i style="background:repeating-linear-gradient(45deg,var(--line) 0 3px,transparent 3px 6px)"></i>No data yet</span></div></div>
-    <div class="chart wide"><h4>The budget across Spain</h4><p class="cap" id="mapcap"></p>
+    <div class="chart wide"><h4>The budget across Spain</h4>
       <div class="map-wrap"><div id="cMap"></div><div><div class="legend" id="mapLeg" style="flex-direction:column;gap:4px"></div><table class="rank" id="mapRank"></table></div></div></div>
   </div>
 
@@ -488,7 +488,6 @@ function chartSpain(R,mat,prin){
 function renderMap(R,mat,prin){
   $("cMap").innerHTML=chartSpain(R,mat,prin); if(!GEO) return;
   const b=R.binding.find(x=>x.mat===mat&&x.p===prin), tot=GEO.regions.reduce((a,g)=>a+g.pop,0);
-  $("mapcap").textContent=b?`${mat} under ${prin}. The national binding budget of ${fT(b.budget)} per year, set by ${b.ind.toLowerCase()}, divided between the autonomous communities by population.`:`${mat} has no complete budget under ${prin}. The map shows population only.`;
   $("mapLeg").innerHTML=CLS.map(c=>`<span><i style="background:color-mix(in srgb,var(--accent) ${c[1]}%,var(--surface))"></i>${c[2]}</span>`).join("");
   $("mapRank").innerHTML="<tr><th>Community</th><th class='n'>Share</th><th class='n'>Budget</th></tr>"+[...GEO.regions].sort((a,c)=>c.pop-a.pop).map(g=>`<tr><td>${g.n}</td><td class="n">${pct(g.pop/tot)}</td><td class="n">${b?fT(b.budget*g.pop/tot):""}</td></tr>`).join("");
 }
