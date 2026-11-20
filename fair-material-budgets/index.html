@@ -35,10 +35,10 @@ select,input,button{font:inherit;color:var(--ink)}
 #tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border:3px solid var(--ink);border-right:0;margin:26px 0;background:var(--surface)}
 .tile{padding:14px 16px 12px;border-right:3px solid var(--ink);display:flex;flex-direction:column;gap:6px;min-width:0}
 .tile span{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em}
-.tile b{font-family:var(--display);font-stretch:112%;font-weight:900;font-size:clamp(26px,3.4vw,44px);line-height:1;overflow-wrap:anywhere}
+.tile b{font-family:var(--display);font-stretch:112%;font-weight:900;font-size:clamp(24px,2.9vw,38px);line-height:1;white-space:nowrap}
 .tile b i{font-style:normal;font-size:.45em;margin-left:4px}
 .tile.y{background:var(--y)}.tile.r{background:var(--crit);color:#fff}.tile.g{background:var(--good);color:#fff}.tile.b{background:var(--accent);color:#fff}
-.tile.b b{font-size:clamp(20px,2.3vw,30px)}
+.tile.b b{font-size:clamp(19px,2.1vw,28px);white-space:normal}
 h2{font-family:var(--display);font-stretch:125%;font-weight:900;font-size:clamp(28px,4.4vw,54px);text-transform:uppercase;line-height:.95;margin:44px 0 16px;letter-spacing:-.01em}
 .figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
 .chart{background:var(--surface);border:3px solid var(--ink);padding:16px 18px 14px;min-width:0;box-shadow:6px 6px 0 var(--ink)}
@@ -258,7 +258,7 @@ const ES = {
  "tonnes = material ÷ impact per tonne":"toneladas = material ÷ impacto por tonelada",
  "binding budget = lowest tonnes across all limits":"presupuesto limitante = el menor tonelaje entre todos los límites",
  "overshoot = demand ÷ binding budget":"exceso = demanda ÷ presupuesto limitante",
- "Full calculations":"Cálculos completos","Full results":"Resultados completos","Inputs":"Datos de entrada","Share of stage budget (%)":"Cuota del presupuesto de la etapa (%)","Tonnes per year":"Toneladas al año",
+ "Full calculations":"Cálculos completos","Full results":"Resultados completos","Inputs":"Datos de entrada","Share of previous stage (%)":"Cuota de la etapa anterior (%)","Tonnes per year":"Toneladas al año",
  "Copy as CSV":"Copiar como CSV","Shares used":"Cuotas utilizadas","Data gaps":"Datos que faltan",
  "Country":"País","Materials and demand":"Materiales y demanda","New material":"Nuevo material","Group":"Grupo","Add material":"Añadir material",
  "Reset":"Restablecer","By limit":"Por límite","Group shares":"Cuotas por grupo","Material shares and impact per tonne":"Cuotas por material e impacto por tonelada","Name":"Nombre",
@@ -300,7 +300,8 @@ const nmL = x => ESL[x.toLowerCase()] !== undefined ? ESL[x.toLowerCase()].toLow
 const TQ = "(?:Mt|kt|t)";
 const RULES = [
  [/^Allocation stage \(budget in (.+)\)$/, a=>`Etapa de asignación (presupuesto en ${a})`],
- [/^How the (.+) space narrows to a (.+) budget under (.+)\. Read left to right\.$/, (a,b,c)=>`Cómo el espacio de ${nmL(a)} se reduce a un presupuesto de ${nmL(b)} con el criterio ${nm(c)}. Se lee de izquierda a derecha.`],
+ [/^(.+) budget for (.+) under (.+)\. Each bar is the share of the stage before it that is passed on\. The figure under each name is the budget left\.$/, (a,b,c)=>`Presupuesto de ${nmL(a)} para ${nmL(b)} con el criterio ${nm(c)}. Cada barra es la parte de la etapa anterior que se transmite. La cifra bajo cada nombre es el presupuesto que queda.`],
+ [/^Global space (.+)\.$/, a=>`Espacio global ${a}.`],
  [/^(.+) under (.+)\. Each bar is the tonnage one indicator allows\. The shortest bar sets the binding budget\.$/, (a,b)=>`${nm(a)} con el criterio ${nm(b)}. Cada barra es el tonelaje que permite un indicador. La barra más corta fija el presupuesto limitante.`],
  [/^Demand divided by the tonnage each indicator allows, under (.+) and (.+)\. A value above 1 means that indicator alone is breached\.$/, (a,b)=>`Demanda dividida por el tonelaje que permite cada indicador, con ${nm(a)} y ${b}. Un valor superior a 1 significa que ese indicador por sí solo se supera.`],
  [/^(.+) under (.+)\. The national binding budget of (.+) per year, set by (.+), divided between the autonomous communities by population\.$/, (a,b,c,d)=>`${nm(a)} con el criterio ${nm(b)}. El presupuesto limitante nacional de ${c} al año, fijado por ${nmL(d)}, repartido entre las comunidades autónomas según su población.`],
@@ -427,56 +428,49 @@ function ticks(max){ const raw=max/4, p=10**Math.floor(Math.log10(raw)), f=raw/p
 function chartAlloc(R,mat,prin,indName){
   const r=R.rows.find(x=>x.p===prin&&x.mat===mat&&x.ind===indName), m=S.materials.find(x=>x.name===mat);
   if(!r||!m) return "<p>Choose a material and an indicator.</p>";
-  const VW=960, cw=50, top=56, bh=250, xs=[66,238,410,582], u=r.unit, ax=56;
-  const gs=S.groupShares[indName]||{}, fs=S.factors[indName]||{};
-  const gsum=S.groups.reduce((a,g)=>a+(ok(gs[g])?+gs[g]:0),0);
-  const inGrp=S.materials.filter(x=>x.group===m.group), wsum=inGrp.reduce((a,x)=>a+(ok((fs[x.name]||{}).share)?+fs[x.name].share:0),0);
-  const cols=[
-    {title:"World",sub:"global space",total:r.X,op:`× ${(r.share*100).toFixed(2)}% of world population`+(r.cap!==1?` × ${nf(2).format(r.cap)}`:""),
-     segs:[{l:"Spain",f:r.share*r.cap,hi:1},{l:"Rest of world",f:1-r.share*r.cap}]},
-    {title:"Spain",sub:"national budget",total:r.spain,op:`× ${pct(r.bs)} ${prin==="Human needs"?"needs share":"building share"}`,
-     segs:[{l:prin==="Human needs"?"Housing and essential infrastructure":"Buildings",f:r.bs,hi:1},{l:"Other sectors",f:1-r.bs}]},
-    {title:"Buildings",sub:"sector budget"+(r.capped?", capped locally":""),total:r.bld,op:`× ${pct(r.g)} group share`,
-     segs:[{l:m.group,f:r.g,hi:1},...S.groups.filter(g=>g!==m.group&&ok(gs[g])).map(g=>({l:g,f:+gs[g]})),...(gsum<0.9999?[{l:"Unallocated",f:1-gsum,un:1}]:[])]},
-    {title:m.group,sub:"group budget",total:r.bld*r.g,op:`× ${pct(r.ws)} share within group`,
-     segs:[{l:m.name,f:r.ws,hi:1},...inGrp.filter(x=>x.name!==m.name&&ok((fs[x.name]||{}).share)).map(x=>({l:x.name,f:+fs[x.name].share})),...(wsum<0.9999?[{l:"Unallocated",f:1-wsum,un:1}]:[])]}
+  const VW=1036, top=40, bh=240, base=top+bh, ax=70, bw=76, u=r.unit;
+  const fC=v=>new Intl.NumberFormat(loc(),{notation:"compact",compactDisplay:"long",maximumSignificantDigits:3}).format(v);
+  const pc=f=>f<0.02?nf(2).format(f*100)+"%":pct(f);
+  const st=[
+    {t:"World",f:1,v:r.X,ref:1},
+    {t:"Spain",f:r.share*r.cap,v:r.spain,of:"World"},
+    {t:prin==="Human needs"?"Housing and essential…":"Buildings",f:r.bs,v:r.bld,of:"Spain"},
+    {t:m.group,f:r.g,v:r.bld*r.g,of:"Buildings"},
+    {t:m.name,f:r.ws,v:r.env,of:m.group}
   ];
-  let out=`<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--neutral)" stroke-width="2"/></pattern></defs>`, stop=null;
-  // y axis, share of each stage
-  out+=`<line x1="${ax}" x2="${ax}" y1="${top}" y2="${top+bh}" stroke="var(--ink)" stroke-width="1.5"/>`;
-  for(const p of [0,25,50,75,100]){ const y=top+bh-bh*p/100; out+=`<line x1="${ax-5}" x2="${ax}" y1="${y}" y2="${y}" stroke="var(--ink)" stroke-width="1.5"/><text x="${ax-9}" y="${y+4}" font-size="11" text-anchor="end">${p}</text>`; }
-  out+=`<text transform="rotate(-90 14 ${top+bh/2})" x="14" y="${top+bh/2}" font-size="12" font-weight="600" text-anchor="middle">Share of stage budget (%)</text>`;
-  // x axis, allocation stages
-  out+=`<line x1="${ax}" x2="${xs[3]+cw+60}" y1="${top+bh}" y2="${top+bh}" stroke="var(--ink)" stroke-width="1.5"/>`;
-  out+=`<text x="${(ax+xs[3]+cw+60)/2}" y="${top+bh+50}" font-size="12" font-weight="600" text-anchor="middle">Allocation stage (budget in ${esc(u)})</text>`;
-  cols.forEach((c,k)=>{ if(stop) return; const x=xs[k];
-    out+=`<text x="${x}" y="18" font-size="13.5" font-weight="600">${esc(c.title)}</text><text x="${x}" y="33" font-size="11" style="fill:var(--muted)">${esc(c.sub)}</text>`;
-    if(!isFinite(c.total)){ stop=c.title; out+=`<text x="${x}" y="${top+20}" font-size="12" style="fill:var(--crit)">data gap</text>`; return; }
-    out+=`<line x1="${x+cw/2}" x2="${x+cw/2}" y1="${top+bh}" y2="${top+bh+5}" stroke="var(--ink)" stroke-width="1.5"/><text x="${x}" y="${top+bh+20}" font-size="11.5" font-family="var(--mono)">${fN(c.total)}</text>`;
-    const hi=c.segs[0]; if(!isFinite(hi.f)){ stop=c.title; out+=`<rect x="${x}" y="${top}" width="${cw}" height="${bh}" fill="url(#hatch)"/><text x="${x+cw+8}" y="${top+16}" font-size="12" style="fill:var(--crit)">share missing</text>`; return; }
-    const hh=Math.max(bh*Math.min(1,hi.f), 4), rest=c.segs.slice(1), rsum=rest.reduce((a,z)=>a+z.f,0)||1; let yy=top;
-    c.segs.forEach((z,j)=>{ const h=j===0?hh:(bh-hh)*z.f/rsum; if(h<=0) return;
-      out+=`<rect x="${x}" y="${yy}" width="${cw}" height="${Math.max(1,h-1.5)}" fill="${j===0?"var(--accent)":z.un?"url(#hatch)":"var(--neutral)"}"${tipAttr(`${z.l}. ${pct(z.f)} of ${c.title.toLowerCase()}, which is ${fN(c.total*z.f,u)}.`)}/>`;
-      if(j>0&&h>=24) out+=`<text x="${x+cw+8}" y="${yy+h/2+1}" font-size="11" style="fill:var(--muted)">${esc(z.l)}</text><text x="${x+cw+8}" y="${yy+h/2+14}" font-size="11" font-family="var(--mono)" style="fill:var(--muted)">${pct(z.f)}</text>`;
-      yy+=h; });
-    const nx=k<3?xs[k+1]:xs[3]+cw+122;
-    out+=`<polygon points="${x+cw},${top} ${nx},${top} ${nx},${top+bh} ${x+cw},${top+hh}" fill="var(--accent)" opacity="0.10"/>`;
-    out+=`<text x="${x+cw+8}" y="${top-8}" font-size="11.5" font-weight="600">${esc(hi.l.length>22?hi.l.slice(0,21)+"…":hi.l)} ${hi.f<0.02?(hi.f*100).toFixed(2)+"%":pct(hi.f)}</text>`;
+  const cx=k=>ax+62+k*118;
+  let out="";
+  for(const p of [0,25,50,75,100]){ const y=base-bh*p/100;
+    out+=`<line x1="${ax}" x2="${cx(4)+bw/2+16}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${ax-10}" y="${y+4}" font-size="11.5" text-anchor="end">${p}</text>`; }
+  out+=`<line x1="${ax}" x2="${ax}" y1="${top}" y2="${base}" stroke="var(--ink)" stroke-width="1.5"/><line x1="${ax}" x2="${cx(4)+bw/2+16}" y1="${base}" y2="${base}" stroke="var(--ink)" stroke-width="1.5"/>`;
+  out+=`<text transform="rotate(-90 16 ${top+bh/2})" x="16" y="${top+bh/2}" font-size="12.5" font-weight="600" text-anchor="middle">Share of previous stage (%)</text>`;
+  out+=`<text x="${(ax+cx(4)+bw/2+16)/2}" y="${base+64}" font-size="12.5" font-weight="600" text-anchor="middle">Allocation stage (budget in ${esc(u)})</text>`;
+  let gap=false;
+  st.forEach((z,k)=>{ const x=cx(k);
+    out+=`<text x="${x}" y="${base+20}" font-size="13" font-weight="700" text-anchor="middle">${esc(z.t)}</text>`;
+    if(gap||!isFinite(z.f)||!isFinite(z.v)){ gap=true; out+=`<text x="${x}" y="${base-10}" font-size="12" text-anchor="middle" style="fill:var(--crit)">data gap</text>`; return; }
+    const h=Math.max(3,bh*Math.min(1,z.f));
+    out+=`<rect x="${x-bw/2}" y="${base-h}" width="${bw}" height="${h}" fill="${z.ref?"var(--neutral)":"var(--accent)"}"${tipAttr(z.ref?`Global space ${fN(z.v,u)}.`:`${z.t}. ${pc(z.f)} of ${z.of.toLowerCase()}, which is ${fN(z.v,u)}.`)}/>`;
+    out+=`<text x="${x}" y="${base-h-8}" font-size="13" font-weight="700" text-anchor="middle">${pc(z.f)}</text>`;
+    out+=`<text x="${x}" y="${base+38}" font-size="11.5" text-anchor="middle">${fC(z.v)}</text>`;
   });
-  const fx=xs[3]+cw+122;
-  out+=`<text x="${fx}" y="18" font-size="13.5" font-weight="600">${esc(m.name)}</text><text x="${fx}" y="33" font-size="11" style="fill:var(--muted)">tonnes per year</text>`;
-  if(!stop&&isFinite(r.annual)){ const D=nz(m.demand), tk=ticks(Math.max(r.annual,isFinite(D)?D:0)), step=tk[1]-tk[0], mx=Math.ceil(Math.max(r.annual,isFinite(D)?D:0)/step-1e-9)*step, bw=48, hb=bh*r.annual/mx, rx=fx+2*bw+30;
-    out+=`<line x1="${fx-8}" x2="${rx}" y1="${top+bh}" y2="${top+bh}" stroke="var(--ink)" stroke-width="1.5"/><line x1="${rx}" x2="${rx}" y1="${top}" y2="${top+bh}" stroke="var(--ink)" stroke-width="1.5"/>`;
-    for(let t=0;t<=mx*1.0001;t+=step){ const y=top+bh-bh*t/mx; out+=`<line x1="${rx}" x2="${rx+5}" y1="${y}" y2="${y}" stroke="var(--ink)" stroke-width="1.5"/><text x="${rx+9}" y="${y+4}" font-size="11">${fT(t)}</text>`; }
-    out+=`<text transform="rotate(90 ${VW-10} ${top+bh/2})" x="${VW-10}" y="${top+bh/2}" font-size="12" font-weight="600" text-anchor="middle">Tonnes per year</text>`;
-    out+=`<rect x="${fx}" y="${top+bh-hb}" width="${bw}" height="${Math.max(2,hb)}" fill="var(--accent)"${tipAttr(`${indName} allows ${fT(r.annual)} of ${m.name} per year. Material budget ${fN(r.env,u)} divided by ${fN(r.IF)} ${u} per tonne${r.yrs!==1?`, spread over ${r.yrs} years`:""}.`)}/>`;
-    out+=`<text x="${fx}" y="${top+bh-hb-6}" font-size="11.5" font-weight="600">${fT(r.annual)}</text><text x="${fx}" y="${top+bh+20}" font-size="11.5">Budget</text>`;
+  // right panel: tonnes
+  const px=cx(4)+bw/2+70, b1=px+56, b2=px+56+bw+28, rx=b2+bw/2+22;
+  out+=`<line x1="${px}" x2="${px}" y1="${top-14}" y2="${base+44}" stroke="var(--ink)" stroke-dasharray="2 4"/>`;
+  out+=`<text x="${b1}" y="${base+20}" font-size="13" font-weight="700" text-anchor="middle">Budget</text><text x="${b2}" y="${base+20}" font-size="13" font-weight="700" text-anchor="middle">Demand</text>`;
+  out+=`<text x="${(b1+b2)/2}" y="${base+64}" font-size="12.5" font-weight="600" text-anchor="middle">${esc(m.name)}</text>`;
+  if(!gap&&isFinite(r.annual)){ const D=nz(m.demand), raw=Math.max(r.annual,isFinite(D)?D:0), tk=ticks(raw), step=tk[1]-tk[0], mx=Math.ceil(raw/step-1e-9)*step, hb=bh*r.annual/mx;
+    for(let t=0;t<=mx*1.0001;t+=step){ const y=base-bh*t/mx; out+=`<line x1="${b1-bw/2-12}" x2="${rx}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${rx+9}" y="${y+4}" font-size="11.5">${fT(t)}</text>`; }
+    out+=`<line x1="${b1-bw/2-12}" x2="${rx}" y1="${base}" y2="${base}" stroke="var(--ink)" stroke-width="1.5"/><line x1="${rx}" x2="${rx}" y1="${top}" y2="${base}" stroke="var(--ink)" stroke-width="1.5"/>`;
+    out+=`<text transform="rotate(90 ${VW-12} ${top+bh/2})" x="${VW-12}" y="${top+bh/2}" font-size="12.5" font-weight="600" text-anchor="middle">Tonnes per year</text>`;
+    out+=`<rect x="${b1-bw/2}" y="${base-hb}" width="${bw}" height="${Math.max(3,hb)}" fill="var(--s3)"${tipAttr(`${indName} allows ${fT(r.annual)} of ${m.name} per year. Material budget ${fN(r.env,u)} divided by ${fN(r.IF)} ${u} per tonne${r.yrs!==1?`, spread over ${r.yrs} years`:""}.`)}/>`;
+    out+=`<text x="${b1}" y="${base-hb-8}" font-size="13" font-weight="700" text-anchor="middle">${fT(r.annual)}</text>`;
+    out+=`<text x="${b1}" y="${base+38}" font-size="11" text-anchor="middle" style="fill:var(--muted)">÷ ${fN(r.IF)} ${esc(u)} per t</text>`;
     if(isFinite(D)){ const hd=bh*D/mx;
-      out+=`<rect x="${fx+bw+18}" y="${top+bh-hd}" width="${bw}" height="${Math.max(2,hd)}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"${tipAttr(`Projected demand ${fT(D)}. Ratio to this indicator's budget ${nf(2).format(D/r.annual)}.`)}/>`;
-      out+=`<text x="${fx+bw+18}" y="${top+bh-hd-6}" font-size="11.5" font-weight="600">${fT(D)}</text><text x="${fx+bw+18}" y="${top+bh+20}" font-size="11.5">Demand</text>`; }
-    out+=`<text x="${fx}" y="${top+bh+36}" font-size="10.5" style="fill:var(--muted)">÷ ${fN(r.IF)} ${esc(u)} per t</text>`;
-  } else out+=`<text x="${fx}" y="${top+20}" font-size="12" style="fill:var(--crit)">data gap</text><text x="${fx}" y="${top+36}" font-size="11" style="fill:var(--muted)">see Data gaps below</text>`;
-  return `<svg viewBox="0 0 ${VW} ${top+bh+60}" style="max-width:none" role="img" aria-label="Allocation map from global space to tonnes of material">${out}</svg>`;
+      out+=`<rect x="${b2-bw/2}" y="${base-hd}" width="${bw}" height="${Math.max(3,hd)}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"${tipAttr(`Projected demand ${fT(D)}. Ratio to this indicator's budget ${nf(2).format(D/r.annual)}.`)}/>`;
+      out+=`<text x="${b2}" y="${base-hd-8}" font-size="13" font-weight="700" text-anchor="middle">${fT(D)}</text>`; }
+  } else out+=`<text x="${(b1+b2)/2}" y="${top+bh/2}" font-size="12" text-anchor="middle" style="fill:var(--crit)">data gap</text>`;
+  return `<svg viewBox="0 0 ${VW} ${base+76}" style="max-width:none" role="img" aria-label="Allocation map from global space to tonnes of material">${out}</svg>`;
 }
 
 let GEO=null;
@@ -572,7 +566,7 @@ function chartOvershoot(R){
 function renderOut(){
   const space=$("space").value, R=compute(S,space), mat=$("selMat").value, prin=$("selPrin").value;
   const ind=$("selInd").value;
-  $("c0cap").textContent=`How the ${ind.toLowerCase()} space narrows to a ${mat?mat.toLowerCase():"material"} budget under ${prin}. Read left to right.`;
+  $("c0cap").textContent=`${ind} budget for ${mat?mat.toLowerCase():"material"} under ${prin}. Each bar is the share of the stage before it that is passed on. The figure under each name is the budget left.`;
   $("c0").innerHTML=chartAlloc(R,mat,prin,ind); renderHeat(R,prin,space); renderMap(R,mat,prin);
   renderHero(R,mat,prin,ind);
   const leg=PRIN.map((p,k)=>`<span><i style="background:${PCOL[k]}"></i>${p}</span>`).join("");
