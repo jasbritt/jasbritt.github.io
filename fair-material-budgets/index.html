@@ -44,6 +44,8 @@ h2{font-family:var(--display);font-stretch:125%;font-weight:900;font-size:clamp(
 .chart{background:var(--surface);border:3px solid var(--ink);padding:16px 18px 14px;min-width:0;box-shadow:6px 6px 0 var(--ink)}
 .chart.wide{grid-column:1/-1}
 .chart h4{font-family:var(--display);font-stretch:112%;font-weight:800;font-size:19px;text-transform:uppercase;margin:0 0 2px}
+#c0cap{font-size:16px;line-height:1.65;color:var(--ink);max-width:100ch;margin-bottom:16px}
+#c0cap b{font-weight:700}
 .chart .cap{font-size:13.5px;color:var(--muted);margin:0 0 10px;max-width:80ch}
 .chart svg{display:block;width:100%;height:auto}
 .chart svg text{font-family:var(--body);fill:var(--ink)}
@@ -227,6 +229,7 @@ function fT(t){ if(!isFinite(t)) return "gap"; const a=Math.abs(t);
   if(a>=1e6) return nf(2).format(t/1e6)+" Mt"; if(a>=1e3) return nf(1).format(t/1e3)+" kt"; return nf(0).format(t)+" t"; }
 function fN(v,unit){ if(!isFinite(v)) return "gap";
   return new Intl.NumberFormat(loc(),{maximumSignificantDigits:4}).format(v)+(unit?" "+unit:""); }
+const fC=v=>new Intl.NumberFormat(loc(),{notation:"compact",compactDisplay:"long",maximumSignificantDigits:3}).format(v);
 const pct = v => isFinite(v) ? nf(1).format(v*100)+"%" : "gap";
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -427,7 +430,6 @@ function chartAlloc(R,mat,prin,indName){
   const r=R.rows.find(x=>x.p===prin&&x.mat===mat&&x.ind===indName), m=S.materials.find(x=>x.name===mat);
   if(!r||!m) return "<p>Choose a material and an indicator.</p>";
   const VW=1036, top=40, bh=240, base=top+bh, ax=70, bw=76, u=r.unit;
-  const fC=v=>new Intl.NumberFormat(loc(),{notation:"compact",compactDisplay:"long",maximumSignificantDigits:3}).format(v);
   const pc=f=>f<0.02?nf(2).format(f*100)+"%":pct(f);
   const st=[
     {t:"World",f:1,v:r.X,ref:1},
@@ -562,7 +564,7 @@ function chartOvershoot(R){
 function renderOut(){
   const space=$("space").value, R=compute(S,space), mat=$("selMat").value, prin=$("selPrin").value;
   const ind=$("selInd").value;
-  $("c0cap").textContent=`${ind} budget for ${mat?mat.toLowerCase():"material"} under ${prin}. Each bar is the share of the stage before it that is passed on. The figure under each name is the budget left.`;
+  $("c0cap").innerHTML=explain(R,mat,prin,ind,space);
   $("c0").innerHTML=chartAlloc(R,mat,prin,ind); renderHeat(R,prin,space); renderMap(R,mat,prin);
   renderHero(R,mat,prin,ind);
   const leg=PRIN.map((p,k)=>`<span><i style="background:${PCOL[k]}"></i>${p}</span>`).join("");
@@ -613,6 +615,34 @@ function renderOut(){
     const miss=[[r.bs,prin==="Human needs"?"needs share":"building share"],[r.g,"group share"],[r.ws,"share within group"],[r.IF,"impact per tonne"],[r.X,"global space"]].filter(x=>!isFinite(x[0])).map(x=>x[1]).join(", ");
     return `<tr><td>${esc(r.ind)}</td><td>${esc(r.mat)}</td><td>${miss}</td></tr>`; }).join("");
   localise();
+}
+
+/* Step-by-step sentence under the first chart. Written in both languages here because it mixes bold numbers with text. */
+function explain(R,mat,prin,ind,space){
+  const r=R.rows.find(x=>x.p===prin&&x.mat===mat&&x.ind===ind), m=S.materials.find(x=>x.name===mat);
+  if(!r||!m) return "";
+  const es=LANG==="es", B=x=>`<b>${x}</b>`, u=esc(r.unit), pc=f=>f<0.02?nf(2).format(f*100)+"%":pct(f), fin=isFinite;
+  const gapTxt=es?" El siguiente paso todavía no tiene datos.":" The next step has no data yet.";
+  const mN=esc(es?nmL(mat):mat.toLowerCase()), gN=esc(es?nmL(m.group):m.group.toLowerCase()), iN=esc(es?nmL(ind):ind.toLowerCase()), D=nz(m.demand);
+  const need=prin==="Human needs", parts=[];
+  if(!fin(r.X)) return gapTxt.trim();
+  parts.push(es?`El espacio ${space==="RSOS"?"restante":"total"} de ${iN} del mundo es de ${B(fC(r.X)+" "+u)}.`
+               :`The world's ${space==="RSOS"?"remaining":"full"} ${iN} space is ${B(fC(r.X)+" "+u)}.`);
+  parts.push(es?`España tiene el ${B(pc(r.share))} de la población mundial${r.cap!==1?` y un factor de capacidad de ${B(nf(2).format(r.cap))}`:""}, por lo que recibe ${B(fC(r.spain))}.`
+               :`Spain has ${B(pc(r.share))} of the world's people${r.cap!==1?` and a capability factor of ${B(nf(2).format(r.cap))}`:""}, so it receives ${B(fC(r.spain))}.`);
+  if(!fin(r.bld)) return parts.join(" ")+gapTxt;
+  parts.push(es?`A ${need?"la vivienda y la infraestructura esencial":"la edificación"} le corresponde el ${B(pct(r.bs))} de esa cantidad, lo que deja ${B(fC(r.bld))}${r.capped?" tras aplicar el límite de capacidad local":""}.`
+               :`${need?"Housing and essential infrastructure take":"Buildings take"} ${B(pct(r.bs))} of that, leaving ${B(fC(r.bld))}${r.capped?" after the local capacity cap":""}.`);
+  if(!fin(r.g)) return parts.join(" ")+gapTxt;
+  parts.push(es?`Al grupo de ${gN} le corresponde el ${B(pct(r.g))}, lo que deja ${B(fC(r.bld*r.g))}.`
+               :`The ${gN} group takes ${B(pct(r.g))}, leaving ${B(fC(r.bld*r.g))}.`);
+  if(!fin(r.ws)) return parts.join(" ")+gapTxt;
+  parts.push(es?`A ${mN} le corresponde el ${B(pct(r.ws))}, lo que deja ${B(fC(r.env)+" "+u)}.`
+               :`${esc(mat)} takes ${B(pct(r.ws))}, leaving ${B(fC(r.env)+" "+u)}.`);
+  if(!fin(r.annual)) return parts.join(" ")+gapTxt;
+  parts.push(es?`Una tonelada de ${mN} ocupa ${B(fN(r.IF)+" "+u)}, por lo que el presupuesto permite ${B(fT(r.annual))} al año${r.yrs>1?`, repartido en ${B(r.yrs)} años`:""}${fin(D)?`, frente a una demanda prevista de ${B(fT(D))}`:""}.`
+               :`One tonne of ${mN} takes up ${B(fN(r.IF)+" "+u)}, so the budget allows ${B(fT(r.annual))} a year${r.yrs>1?`, spread over ${B(r.yrs)} years`:""}${fin(D)?`, against projected demand of ${B(fT(D))}`:""}.`);
+  return parts.join(" ");
 }
 
 function renderHero(R,mat,prin,ind){
