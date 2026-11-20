@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fair Material Budgets Team A Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Poster layout: colour blocks, heavy black outlines, one wide display face. Graphics first, words last. */
+:root{color-scheme:light;--bg:#efece4;--surface:#ffffff;--ink:#141414;--muted:#55524b;--line:#d8d3c6;
+  --accent:#2a4bd7;--crit:#e5383b;--good:#1f9d6b;--neutral:#cfcabf;--y:#ffc21a;
+  --s1:#2a4bd7;--s2:#e5383b;--s3:#ffc21a;
+  --display:"Archivo","Arial Black",Arial,sans-serif;--body:"DM Sans","Helvetica Neue",Arial,sans-serif;--mono:"DM Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+header{background:var(--y);border-bottom:3px solid var(--ink)}
+header .wrap{padding-top:34px;padding-bottom:30px}
+.tag{display:inline-block;background:var(--ink);color:var(--y);font-family:var(--mono);font-size:12.5px;padding:4px 10px;margin-bottom:16px}
+h1{font-family:var(--display);font-stretch:125%;font-weight:900;font-size:clamp(40px,8.4vw,116px);line-height:.92;letter-spacing:-.02em;margin:0;text-transform:uppercase;text-wrap:balance}
+header p{font-size:clamp(17px,2vw,22px);font-weight:500;max-width:40ch;margin:18px 0 0}
+.ctl{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff}
+.ctl .wrap{display:flex;flex-wrap:wrap;gap:10px 18px;padding-top:10px;padding-bottom:10px}
+.ctl label{display:flex;align-items:center;gap:8px;font-size:12.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em}
+select,input,button{font:inherit;color:var(--ink)}
+.ctl select{background:var(--y);border:0;padding:7px 10px;font-weight:700;font-family:var(--body);text-transform:none;letter-spacing:0}
+#tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border:3px solid var(--ink);border-right:0;margin:26px 0;background:var(--surface)}
+.tile{padding:14px 16px 12px;border-right:3px solid var(--ink);display:flex;flex-direction:column;gap:6px;min-width:0}
+.tile span{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.05em}
+.tile b{font-family:var(--display);font-stretch:112%;font-weight:900;font-size:clamp(26px,3.4vw,44px);line-height:1;overflow-wrap:anywhere}
+.tile b i{font-style:normal;font-size:.45em;margin-left:4px}
+.tile.y{background:var(--y)}.tile.r{background:var(--crit);color:#fff}.tile.g{background:var(--good);color:#fff}.tile.b{background:var(--accent);color:#fff}
+.tile.b b{font-size:clamp(20px,2.3vw,30px)}
+h2{font-family:var(--display);font-stretch:125%;font-weight:900;font-size:clamp(28px,4.4vw,54px);text-transform:uppercase;line-height:.95;margin:44px 0 16px;letter-spacing:-.01em}
+.figs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.chart{background:var(--surface);border:3px solid var(--ink);padding:16px 18px 14px;min-width:0;box-shadow:6px 6px 0 var(--ink)}
+.chart.wide{grid-column:1/-1}
+.chart h4{font-family:var(--display);font-stretch:112%;font-weight:800;font-size:19px;text-transform:uppercase;margin:0 0 2px}
+.chart .cap{font-size:13.5px;color:var(--muted);margin:0 0 10px;max-width:80ch}
+.chart svg{display:block;width:100%;height:auto}
+.chart svg text{font-family:var(--body);fill:var(--ink)}
+.chart svg rect[data-tip],.chart svg circle[data-tip]{stroke:var(--ink);stroke-width:1.5}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin-bottom:8px}
+.legend i{display:inline-block;width:12px;height:12px;margin-right:6px;vertical-align:-1px;border:1.5px solid var(--ink)}
+.legend i.ln{height:0;border:0;border-top:2px dashed var(--ink);width:16px;vertical-align:3px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--ink);white-space:nowrap}
+td.n,th.n{text-align:right;white-space:nowrap}
+.hm td{text-align:center;min-width:86px;border:1.5px solid var(--ink)}
+.hm td:first-child{text-align:left;font-weight:700;border-left:0}.hm th{text-align:center}
+.map-wrap{display:grid;grid-template-columns:minmax(0,3fr) minmax(230px,1fr);gap:18px;align-items:start}
+.region{stroke:var(--ink);stroke-width:1}.region:hover,.region:focus{stroke-width:2.5;outline:none}
+.rank td{padding:3px 8px;font-size:13px}
+#steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:3px solid var(--ink);background:var(--surface);box-shadow:6px 6px 0 var(--ink)}
+.st{padding:14px 14px 16px;border-right:3px solid var(--ink);display:flex;flex-direction:column;gap:6px;min-width:0}
+.st:last-child{border-right:0;background:var(--crit);color:#fff}
+.st:nth-child(5){background:var(--y)}
+.st em{font-family:var(--display);font-weight:900;font-style:normal;font-size:34px;line-height:1}
+.st h4{margin:0;font-family:var(--display);font-stretch:112%;text-transform:uppercase;font-size:15px}
+.st code{font-family:var(--mono);font-size:12px;min-height:3.2em;overflow-wrap:anywhere}
+.st b{font-family:var(--display);font-weight:900;font-size:clamp(17px,1.7vw,24px);line-height:1.05;overflow-wrap:anywhere}
+.st span{font-size:11.5px;font-family:var(--mono)}
+.formulae{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:0 28px;margin-top:22px;font-family:var(--mono);font-size:13.5px}
+.formulae div{padding:9px 0;border-top:1.5px solid var(--ink)}
+.formulae b{font-family:var(--body)}
+details{background:var(--surface);border:3px solid var(--ink);margin:16px 0;padding:0}
+summary{cursor:pointer;font-family:var(--display);font-stretch:112%;font-weight:800;text-transform:uppercase;font-size:17px;padding:14px 18px}
+details>div.in{padding:4px 18px 18px}
+h3{font-size:15px;margin:18px 0 6px;text-transform:uppercase;font-family:var(--mono);font-weight:500;letter-spacing:.04em}
+.bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:end;margin:10px 0}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+input[type=number],input[type=text],details select{background:#fff;border:1.5px solid var(--ink);padding:6px 8px;font-family:var(--mono);font-size:13px;width:150px}
+td input[type=number]{width:118px}td select{width:126px}
+button{background:var(--ink);color:#fff;border:0;padding:8px 14px;font-weight:700;cursor:pointer}
+button.ghost,button.x{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tabs button{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.tabs button[aria-pressed=true]{background:var(--y)}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.pill{font-weight:700;font-size:12.5px}.pill.bad{color:var(--crit)}.pill.ok{color:var(--good)}.pill.gap{color:var(--muted)}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font-size:12.5px;padding:7px 10px;max-width:260px;opacity:0;z-index:10}
+footer{margin:50px 0 60px;font-size:13px;color:var(--muted);max-width:90ch}
+@media (max-width:900px){.figs{grid-template-columns:1fr}#steps{grid-template-columns:repeat(2,minmax(0,1fr))}.st{border-bottom:3px solid var(--ink)}.map-wrap{grid-template-columns:1fr}.chart{box-shadow:none}#steps{box-shadow:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <span class="tag">TEAM A · FIBE3 × RAMBOLL × GBCe · SPAIN</span>
+  <h1>Fair material budgets</h1>
+  <p>How much can Spain build with, inside a fair share of the planet's limits?</p>
+</div></header>
+
+<div class="ctl"><div class="wrap">
+  <label>Material <select id="selMat"></select></label>
+  <label>Fairness rule <select id="selPrin"></select></label>
+  <label>Limit <select id="selInd"></select></label>
+  <label>Space <select id="space"><option>RSOS</option><option>FSOS</option></select></label>
+</div></div>
+
+<main class="wrap">
+  <div id="tiles"></div>
+
+  <div class="figs">
+    <div class="chart wide"><h4>From the planet to one material</h4><p class="cap" id="c0cap"></p><div id="c0"></div></div>
+    <div class="chart"><h4>The fairness corridor</h4><p class="cap">Binding budget under each fairness rule. Dashed line is demand.</p><div class="legend" id="leg1"></div><div id="c1"></div></div>
+    <div class="chart"><h4>Which limit bites first</h4><p class="cap" id="c2cap"></p><div id="c2"></div>
+      <h4 style="margin-top:22px">How far over</h4><p class="cap">Demand ÷ binding budget, log scale. Right of 1 is overshoot.</p><div class="legend" id="leg3"></div><div id="c3"></div></div>
+    <div class="chart wide"><h4>Every material against every limit</h4><p class="cap" id="hmcap"></p>
+      <div class="tw"><table class="hm" id="tHeat"></table></div>
+      <div class="legend" style="margin-top:10px"><span><i style="background:color-mix(in srgb,var(--good) 30%,#fff)"></i>Within budget</span><span><i style="background:color-mix(in srgb,var(--crit) 30%,#fff)"></i>Up to 2×</span><span><i style="background:color-mix(in srgb,var(--crit) 60%,#fff)"></i>2 to 10×</span><span><i style="background:color-mix(in srgb,var(--crit) 90%,#fff)"></i>Over 10×</span><span><i style="background:repeating-linear-gradient(45deg,var(--line) 0 3px,transparent 3px 6px)"></i>No data yet</span></div></div>
+    <div class="chart wide"><h4>The budget across Spain</h4><p class="cap" id="mapcap"></p>
+      <div class="map-wrap"><div id="cMap"></div><div><div class="legend" id="mapLeg" style="flex-direction:column;gap:4px"></div><table class="rank" id="mapRank"></table></div></div></div>
+  </div>
+
+  <h2>How it was calculated</h2>
+  <div id="steps"></div>
+  <div class="formulae">
+    <div><b>1</b> space = full space − used space</div>
+    <div><b>2</b> Spain = space × Spain's people ÷ world's people</div>
+    <div><b>2b</b> ability to pay = Spain × world GDP per head ÷ Spain GDP per head</div>
+    <div><b>3</b> buildings = Spain × buildings' share of that pressure</div>
+    <div><b>3b</b> human needs swaps in the needs share</div>
+    <div><b>4</b> material = buildings × group share × share in group</div>
+    <div><b>5</b> tonnes = material ÷ impact per tonne</div>
+    <div><b>5b</b> binding budget = lowest tonnes across all limits</div>
+    <div><b>6</b> overshoot = demand ÷ binding budget</div>
+  </div>
+
+  <details><summary>Full working for this material</summary><div class="in"><div class="tw"><table id="tAudit"></table></div></div></details>
+  <details><summary>All results as a table</summary><div class="in">
+    <div class="tw"><table id="tOver"></table></div>
+    <p><button id="copy" type="button" class="ghost">Copy as CSV</button> <span id="copied" style="font-size:13px"></span></p>
+    <h3 id="matrixCap"></h3><div class="tw"><table id="tMatrix"></table></div>
+    <h3>Shares used</h3><div class="tw"><table id="tShares"></table></div>
+    <h3 id="gapSum">Data gaps</h3><div class="tw"><table id="tGaps"></table></div>
+  </div></details>
+  <details><summary>Change the inputs</summary><div class="in">
+    <h3>Country</h3><div class="bar" id="params"></div>
+    <h3>Materials and demand</h3><div class="tw"><table id="matTable"></table></div>
+    <div class="bar"><label class="f">New material<input type="text" id="newMat" placeholder="Name"></label><label class="f">Group<select id="newGrp"></select></label>
+      <button id="addMat" type="button">Add material</button><button id="reset" type="button" class="ghost">Reset</button></div>
+    <h3>By limit</h3><div class="tabs" id="indTabs" role="group" aria-label="Indicator"></div><div class="bar" id="indFields"></div>
+    <div class="g2"><div><h3>Group shares</h3><div class="tw"><table id="grpTable"></table></div></div><div><h3>Material shares and impact per tonne</h3><div class="tw"><table id="facTable"></table></div></div></div>
+  </div></details>
+
+  <footer>All inputs are the illustrative placeholder values from Chapter 10 and the Ramboll slides, to be replaced with verified Spanish data. Map populations are INE figures for 1 January 2025. Edits made here are lost on reload.</footer>
+</main>
+<div id="tip" role="status"></div>
+<script>
+"use strict";
+const PRIN = ["Equal per capita","Ability to pay","Human needs"];
+const PCOL = ["var(--s1)","var(--s2)","var(--s3)"];
+const big=t=>{ if(!isFinite(t)) return ["–",""]; const a=Math.abs(t); return a>=1e6?[nf(2).format(t/1e6),"Mt"]:a>=1e3?[nf(0).format(t/1e3),"kt"]:[nf(0).format(t),"t"]; };
+const UP = 8.5e9/48e6;
+const DEFAULT = {
+  params:{popES:48e6,popWorld:8.5e9,gdpES:30000,gdpWorld:15000,capOverride:0.8},
+  groups:["Mineral","Metals","Bio-based","Chemicals"],
+  indicators:[
+    {name:"Climate",unit:"t CO2e",full:10000e6,occupied:0,years:1,bshare:0.15,needs:0.20,local:null},
+    {name:"Water",unit:"m3",full:900e6*UP,occupied:0,years:1,bshare:0.15,needs:null,local:null},
+    {name:"Biodiversity",unit:"PDF.m2.yr",full:1.2e6*UP,occupied:0,years:1,bshare:0.15,needs:null,local:null},
+    {name:"Toxicity",unit:"CTUe",full:240000*UP,occupied:0,years:1,bshare:0.15,needs:null,local:null},
+    {name:"Material footprint",unit:"t RME",full:160e6*UP,occupied:0,years:1,bshare:0.15,needs:null,local:null}
+  ],
+  groupShares:{"Climate":{"Mineral":0.5},"Water":{"Mineral":0.5},"Material footprint":{"Mineral":0.5},"Biodiversity":{"Bio-based":0.5},"Toxicity":{"Chemicals":0.2}},
+  materials:[
+    {name:"Cement",group:"Mineral",demand:6e6},
+    {name:"Steel",group:"Metals",demand:null},
+    {name:"Aluminium",group:"Metals",demand:null},
+    {name:"Timber",group:"Bio-based",demand:1e6},
+    {name:"Chemical product",group:"Chemicals",demand:0.5e6}
+  ],
+  factors:{
+    "Climate":{"Cement":{share:0.6,intensity:0.6}},
+    "Water":{"Cement":{share:0.6,intensity:120}},
+    "Material footprint":{"Cement":{share:0.5,intensity:1.2}},
+    "Biodiversity":{"Timber":{share:0.6,intensity:0.08}},
+    "Toxicity":{"Chemical product":{share:0.4,intensity:0.008}}
+  }
+};
+const clone = o => JSON.parse(JSON.stringify(o));
+let S = clone(DEFAULT), curInd = 0;
+const $ = id => document.getElementById(id);
+const ok = v => v !== null && v !== undefined && v !== "" && isFinite(v);
+const nz = v => ok(v) ? +v : NaN;
+
+/* ---------- calculation ---------- */
+function capFactor(P){ return ok(P.capOverride) ? +P.capOverride : Math.min(1, P.gdpWorld/P.gdpES); }
+function compute(S, space){
+  const rows = [], P = S.params, share = P.popES/P.popWorld, cap = capFactor(P);
+  for (const p of PRIN) for (const i of S.indicators) for (const m of S.materials){
+    const X = nz(i.full) - (space==="RSOS" ? (ok(i.occupied)? +i.occupied : 0) : 0);
+    const spain = X*share*(p==="Ability to pay" ? cap : 1);
+    const bs = nz(p==="Human needs" ? i.needs : i.bshare);
+    let bld = spain*bs, capped = false;
+    if (ok(i.local) && +i.local < bld){ bld = +i.local; capped = true; }
+    const g = nz((S.groupShares[i.name]||{})[m.group]);
+    const f = (S.factors[i.name]||{})[m.name] || {};
+    const env = bld*g*nz(f.share);
+    const cum = env/nz(f.intensity), yrs = ok(i.years)&&+i.years>0 ? +i.years : 1;
+    rows.push({p,ind:i.name,unit:i.unit,mat:m.name,group:m.group,X,share,cap:p==="Ability to pay"?cap:1,spain,bs,bld,capped,g,ws:nz(f.share),env,IF:nz(f.intensity),yrs,cum,annual:cum/yrs});
+  }
+  const binding = [];
+  for (const p of PRIN) for (const m of S.materials){
+    const c = rows.filter(r=>r.p===p&&r.mat===m.name&&isFinite(r.annual)&&r.annual>=0);
+    if (!c.length) continue;
+    const b = c.reduce((a,r)=>r.annual<a.annual?r:a);
+    const D = nz(m.demand);
+    binding.push({p,mat:m.name,group:m.group,ind:b.ind,budget:b.annual,cum:b.cum,n:c.length,perCap:b.annual*1000/S.params.popES,D,ratio:D/b.annual,red:Math.max(0,1-b.annual/D),gap:Math.max(0,D-b.annual)});
+  }
+  return {rows,binding};
+}
+
+/* ---------- formatting ---------- */
+const nf = (d)=>new Intl.NumberFormat("en-GB",{maximumFractionDigits:d,minimumFractionDigits:d});
+function fT(t){ if(!isFinite(t)) return "gap"; const a=Math.abs(t);
+  if(a>=1e6) return nf(2).format(t/1e6)+" Mt"; if(a>=1e3) return nf(1).format(t/1e3)+" kt"; return nf(0).format(t)+" t"; }
+function fN(v,unit){ if(!isFinite(v)) return "gap";
+  return new Intl.NumberFormat("en-GB",{maximumSignificantDigits:4}).format(v)+(unit?" "+unit:""); }
+const pct = v => isFinite(v) ? nf(1).format(v*100)+"%" : "gap";
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- inputs ---------- */
+function numInput(id,val,on){ const e=document.createElement("input"); e.type="number"; e.step="any"; e.id=id; e.value=ok(val)?val:"";
+  e.addEventListener("input",()=>{ on(e.value===""?null:+e.value); renderOut(); }); return e; }
+function field(label,id,val,on){ const l=document.createElement("label"); l.className="f"; l.htmlFor=id; l.textContent=label; l.appendChild(numInput(id,val,on)); return l; }
+function renderInputs(){
+  const P=S.params, pr=$("params"); pr.innerHTML="";
+  pr.append(field("Population of Spain","p_popES",P.popES,v=>P.popES=v),
+    field("World population","p_popW",P.popWorld,v=>P.popWorld=v),
+    field("GDP per capita, Spain","p_gdpES",P.gdpES,v=>P.gdpES=v),
+    field("GDP per capita, world","p_gdpW",P.gdpWorld,v=>P.gdpWorld=v),
+    field("Capability factor override (blank uses GDP ratio)","p_cap",P.capOverride,v=>P.capOverride=v));
+  $("newGrp").innerHTML=S.groups.map(g=>`<option>${esc(g)}</option>`).join("");
+  // materials
+  const mt=$("matTable"); mt.innerHTML="<tr><th>Material</th><th>Group</th><th>Projected demand, t per year</th><th></th></tr>";
+  S.materials.forEach((m,k)=>{ const tr=mt.insertRow();
+    tr.insertCell().textContent=m.name;
+    const sel=document.createElement("select"); sel.id="m_g"+k; sel.setAttribute("aria-label","Group for "+m.name);
+    sel.innerHTML=S.groups.map(g=>`<option${g===m.group?" selected":""}>${esc(g)}</option>`).join("");
+    sel.addEventListener("change",()=>{m.group=sel.value; renderInputs(); renderOut();}); tr.insertCell().appendChild(sel);
+    const d=numInput("m_d"+k,m.demand,v=>m.demand=v); d.setAttribute("aria-label","Demand for "+m.name); tr.insertCell().appendChild(d);
+    const b=document.createElement("button"); b.type="button"; b.className="x"; b.textContent="Remove"; b.setAttribute("aria-label","Remove "+m.name);
+    b.addEventListener("click",()=>{S.materials.splice(k,1); renderInputs(); renderOut();}); tr.insertCell().appendChild(b); });
+  // indicator tabs
+  const tabs=$("indTabs"); tabs.innerHTML="";
+  S.indicators.forEach((i,k)=>{ const b=document.createElement("button"); b.type="button"; b.textContent=i.name; b.setAttribute("aria-pressed",k===curInd);
+    b.addEventListener("click",()=>{curInd=k; renderInputs();}); tabs.appendChild(b); });
+  const I=S.indicators[curInd], f=$("indFields"); f.innerHTML="";
+  f.append(field("Full space, "+I.unit,"i_full",I.full,v=>I.full=v),
+    field("Occupied space, "+I.unit,"i_occ",I.occupied,v=>I.occupied=v),
+    field("Budget period, years","i_yrs",I.years,v=>I.years=v),
+    field("Building impact share, 0 to 1","i_bs",I.bshare,v=>I.bshare=v),
+    field("Needs share, 0 to 1","i_ns",I.needs,v=>I.needs=v),
+    field("Local capacity for buildings, "+I.unit,"i_loc",I.local,v=>I.local=v));
+  const gt=$("grpTable"); gt.innerHTML="<tr><th>Group</th><th>Share, 0 to 1</th></tr>";
+  S.groupShares[I.name]=S.groupShares[I.name]||{};
+  S.groups.forEach((g,k)=>{ const tr=gt.insertRow(); tr.insertCell().textContent=g;
+    const e=numInput("g_"+k,S.groupShares[I.name][g],v=>S.groupShares[I.name][g]=v); e.setAttribute("aria-label",g+" share"); tr.insertCell().appendChild(e); });
+  const ft=$("facTable"); ft.innerHTML=`<tr><th>Material</th><th>Share within group</th><th>Impact, ${esc(I.unit)} per t</th></tr>`;
+  S.factors[I.name]=S.factors[I.name]||{};
+  S.materials.forEach((m,k)=>{ const F=S.factors[I.name][m.name]=S.factors[I.name][m.name]||{share:null,intensity:null};
+    const tr=ft.insertRow(); tr.insertCell().textContent=m.name+" ("+m.group+")";
+    const a=numInput("f_s"+k,F.share,v=>F.share=v); a.setAttribute("aria-label",m.name+" share within group"); tr.insertCell().appendChild(a);
+    const b=numInput("f_i"+k,F.intensity,v=>F.intensity=v); b.setAttribute("aria-label",m.name+" impact per tonne"); tr.insertCell().appendChild(b); });
+  // selectors
+  const sm=$("selMat"), keep=sm.value; sm.innerHTML=S.materials.map(m=>`<option>${esc(m.name)}</option>`).join("");
+  if (S.materials.some(m=>m.name===keep)) sm.value=keep;
+  if(!$("selPrin").options.length) $("selPrin").innerHTML=PRIN.map(p=>`<option>${p}</option>`).join("");
+  if(!$("selInd").options.length) $("selInd").innerHTML=S.indicators.map(i=>`<option>${esc(i.name)}</option>`).join("");
+}
+
+/* ---------- charts ---------- */
+const W=720;
+function ticks(max){ const raw=max/4, p=10**Math.floor(Math.log10(raw)), f=raw/p, step=(f<1.5?1:f<3.5?2:f<7.5?5:10)*p, o=[]; for(let v=0;v<=max*1.0001;v+=step) o.push(v); return o; }
+
+function chartAlloc(R,mat,prin,indName){
+  const r=R.rows.find(x=>x.p===prin&&x.mat===mat&&x.ind===indName), m=S.materials.find(x=>x.name===mat);
+  if(!r||!m) return "<p>Choose a material and an indicator.</p>";
+  const VW=860, cw=50, top=56, bh=250, xs=[14,186,358,530], u=r.unit;
+  const gs=S.groupShares[indName]||{}, fs=S.factors[indName]||{};
+  const gsum=S.groups.reduce((a,g)=>a+(ok(gs[g])?+gs[g]:0),0);
+  const inGrp=S.materials.filter(x=>x.group===m.group), wsum=inGrp.reduce((a,x)=>a+(ok((fs[x.name]||{}).share)?+fs[x.name].share:0),0);
+  const cols=[
+    {title:"World",sub:"global space",total:r.X,op:`× ${(r.share*100).toFixed(2)}% of world population`+(r.cap!==1?` × ${nf(2).format(r.cap)}`:""),
+     segs:[{l:"Spain",f:r.share*r.cap,hi:1},{l:"Rest of world",f:1-r.share*r.cap}]},
+    {title:"Spain",sub:"national budget",total:r.spain,op:`× ${pct(r.bs)} ${prin==="Human needs"?"needs share":"building share"}`,
+     segs:[{l:prin==="Human needs"?"Housing and essential infrastructure":"Buildings",f:r.bs,hi:1},{l:"Other sectors",f:1-r.bs}]},
+    {title:"Buildings",sub:"sector budget"+(r.capped?", capped locally":""),total:r.bld,op:`× ${pct(r.g)} group share`,
+     segs:[{l:m.group,f:r.g,hi:1},...S.groups.filter(g=>g!==m.group&&ok(gs[g])).map(g=>({l:g,f:+gs[g]})),...(gsum<0.9999?[{l:"Unallocated",f:1-gsum,un:1}]:[])]},
+    {title:m.group,sub:"group budget",total:r.bld*r.g,op:`× ${pct(r.ws)} share within group`,
+     segs:[{l:m.name,f:r.ws,hi:1},...inGrp.filter(x=>x.name!==m.name&&ok((fs[x.name]||{}).share)).map(x=>({l:x.name,f:+fs[x.name].share})),...(wsum<0.9999?[{l:"Unallocated",f:1-wsum,un:1}]:[])]}
+  ];
+  let out=`<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--neutral)" stroke-width="2"/></pattern></defs>`, stop=null;
+  cols.forEach((c,k)=>{ if(stop) return; const x=xs[k];
+    out+=`<text x="${x}" y="18" font-size="13.5" font-weight="600">${esc(c.title)}</text><text x="${x}" y="33" font-size="11" style="fill:var(--muted)">${esc(c.sub)}</text>`;
+    if(!isFinite(c.total)){ stop=c.title; out+=`<text x="${x}" y="${top+20}" font-size="12" style="fill:var(--crit)">data gap</text>`; return; }
+    out+=`<text x="${x}" y="${top+bh+18}" font-size="11.5" font-family="var(--mono)">${fN(c.total)}</text><text x="${x}" y="${top+bh+32}" font-size="10.5" style="fill:var(--muted)">${esc(u)}</text>`;
+    const hi=c.segs[0]; if(!isFinite(hi.f)){ stop=c.title; out+=`<rect x="${x}" y="${top}" width="${cw}" height="${bh}" fill="url(#hatch)"/><text x="${x+cw+8}" y="${top+16}" font-size="12" style="fill:var(--crit)">share missing</text>`; return; }
+    const hh=Math.max(bh*Math.min(1,hi.f), 4), rest=c.segs.slice(1), rsum=rest.reduce((a,z)=>a+z.f,0)||1; let yy=top;
+    c.segs.forEach((z,j)=>{ const h=j===0?hh:(bh-hh)*z.f/rsum; if(h<=0) return;
+      out+=`<rect x="${x}" y="${yy}" width="${cw}" height="${Math.max(1,h-1.5)}" fill="${j===0?"var(--accent)":z.un?"url(#hatch)":"var(--neutral)"}"${tipAttr(`${z.l}. ${pct(z.f)} of ${c.title.toLowerCase()}, which is ${fN(c.total*z.f,u)}.`)}/>`;
+      if(j>0&&h>=24) out+=`<text x="${x+cw+8}" y="${yy+h/2+1}" font-size="11" style="fill:var(--muted)">${esc(z.l)}</text><text x="${x+cw+8}" y="${yy+h/2+14}" font-size="11" font-family="var(--mono)" style="fill:var(--muted)">${pct(z.f)}</text>`;
+      yy+=h; });
+    const nx=k<3?xs[k+1]:xs[3]+cw+122;
+    out+=`<polygon points="${x+cw},${top} ${nx},${top} ${nx},${top+bh} ${x+cw},${top+hh}" fill="var(--accent)" opacity="0.10"/>`;
+    out+=`<text x="${x+cw+8}" y="${top-8}" font-size="11.5" font-weight="600">${esc(hi.l.length>22?hi.l.slice(0,21)+"…":hi.l)} ${hi.f<0.02?(hi.f*100).toFixed(2)+"%":pct(hi.f)}</text>`;
+  });
+  const fx=xs[3]+cw+122;
+  out+=`<text x="${fx}" y="18" font-size="13.5" font-weight="600">${esc(m.name)}</text><text x="${fx}" y="33" font-size="11" style="fill:var(--muted)">tonnes per year</text>`;
+  if(!stop&&isFinite(r.annual)){ const D=nz(m.demand), mx=Math.max(r.annual,isFinite(D)?D:0), bw=48, hb=bh*r.annual/mx;
+    out+=`<rect x="${fx}" y="${top+bh-hb}" width="${bw}" height="${Math.max(2,hb)}" fill="var(--accent)"${tipAttr(`${indName} allows ${fT(r.annual)} of ${m.name} per year. Material budget ${fN(r.env,u)} divided by ${fN(r.IF)} ${u} per tonne${r.yrs!==1?`, spread over ${r.yrs} years`:""}.`)}/>`;
+    out+=`<text x="${fx}" y="${top+bh-hb-6}" font-size="11.5" font-weight="600">${fT(r.annual)}</text><text x="${fx}" y="${top+bh+18}" font-size="11.5">Budget</text>`;
+    if(isFinite(D)){ const hd=bh*D/mx;
+      out+=`<rect x="${fx+bw+18}" y="${top+bh-hd}" width="${bw}" height="${Math.max(2,hd)}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"${tipAttr(`Projected demand ${fT(D)}. Ratio to this indicator's budget ${nf(2).format(D/r.annual)}.`)}/>`;
+      out+=`<text x="${fx+bw+18}" y="${top+bh-hd-6}" font-size="11.5" font-weight="600">${fT(D)}</text><text x="${fx+bw+18}" y="${top+bh+18}" font-size="11.5">Demand</text>`; }
+    out+=`<text x="${fx}" y="${top+bh+32}" font-size="10.5" style="fill:var(--muted)">÷ ${fN(r.IF)} ${esc(u)} per t</text>`;
+  } else out+=`<text x="${fx}" y="${top+20}" font-size="12" style="fill:var(--crit)">data gap</text><text x="${fx}" y="${top+36}" font-size="11" style="fill:var(--muted)">see Data gaps below</text>`;
+  return `<svg viewBox="0 0 ${VW} ${top+bh+42}" style="max-width:none" role="img" aria-label="Allocation map from global space to tonnes of material">${out}</svg>`;
+}
+
+let GEO=null;
+const CLS=[[6e6,100,"Over 6 million people"],[3e6,74,"3 to 6 million"],[2e6,52,"2 to 3 million"],[1e6,34,"1 to 2 million"],[0,18,"Under 1 million"]];
+function chartSpain(R,mat,prin){
+  if(!GEO) return "<p>The map data did not load.</p>";
+  const b=R.binding.find(x=>x.mat===mat&&x.p===prin), tot=GEO.regions.reduce((a,g)=>a+g.pop,0);
+  let out=`<rect x="6" y="414" width="214" height="113" fill="none" stroke="var(--line)"/><text x="12" y="408" font-size="10.5" style="fill:var(--muted)">Canarias, inset</text>`;
+  for(const g of GEO.regions){ const c=CLS.find(z=>g.pop>=z[0]), v=b?b.budget*g.pop/tot:NaN;
+    out+=`<path class="region" d="${g.d}" fill="color-mix(in srgb,var(--accent) ${c[1]}%,var(--surface))"${tipAttr(`${g.n}. ${nf(0).format(g.pop)} residents, ${pct(g.pop/tot)} of Spain.`+(b?` Share of the ${mat} budget ${fT(v)} per year.`:" No complete budget for this material yet."))}/>`; }
+  for(const g of GEO.regions){ const v=b?b.budget*g.pop/tot:NaN; if(g.n==="Ceuta"||g.n==="Melilla"){ out+=`<circle cx="${g.cx}" cy="${g.cy}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.5"${tipAttr(`${g.n}. ${nf(0).format(g.pop)} residents.`)}/><text x="${g.cx+8}" y="${g.cy+4}" font-size="10">${g.n}</text>`; continue; }
+    const small=["La Rioja","Cantabria","País Vasco","Navarra","Asturias"].includes(g.n), lbl=g.n==="Comunitat Valenciana"?"C. Valenciana":g.n;
+    out+=`<text x="${g.cx}" y="${g.cy+(g.n==="Illes Balears"?26:3)}" font-size="${small?8.5:10.5}" text-anchor="middle" font-weight="500" style="paint-order:stroke;stroke:var(--surface);stroke-width:2.5px;stroke-opacity:.75">${lbl}</text>`;
+    if(b&&!small) out+=`<text x="${g.cx}" y="${g.cy+(g.n==="Illes Balears"?38:15)}" font-size="9.5" text-anchor="middle" font-family="var(--mono)" style="paint-order:stroke;stroke:var(--surface);stroke-width:2.5px;stroke-opacity:.75">${fT(v)}</text>`; }
+  return `<svg viewBox="0 0 ${GEO.w} ${GEO.h}" style="max-width:none" role="img" aria-label="Map of Spain by autonomous community">${out}</svg>`;
+}
+function renderMap(R,mat,prin){
+  $("cMap").innerHTML=chartSpain(R,mat,prin); if(!GEO) return;
+  const b=R.binding.find(x=>x.mat===mat&&x.p===prin), tot=GEO.regions.reduce((a,g)=>a+g.pop,0);
+  $("mapcap").textContent=b?`${mat} under ${prin}. The national binding budget of ${fT(b.budget)} per year, set by ${b.ind.toLowerCase()}, divided between the autonomous communities by population.`:`${mat} has no complete budget under ${prin}. The map shows population only.`;
+  $("mapLeg").innerHTML=CLS.map(c=>`<span><i style="background:color-mix(in srgb,var(--accent) ${c[1]}%,var(--surface))"></i>${c[2]}</span>`).join("");
+  $("mapRank").innerHTML="<tr><th>Community</th><th class='n'>Share</th><th class='n'>Budget</th></tr>"+[...GEO.regions].sort((a,c)=>c.pop-a.pop).map(g=>`<tr><td>${g.n}</td><td class="n">${pct(g.pop/tot)}</td><td class="n">${b?fT(b.budget*g.pop/tot):""}</td></tr>`).join("");
+}
+function renderHeat(R,prin,space){
+  $("hmcap").textContent=`Demand divided by the tonnage each indicator allows, under ${prin} and ${space}. A value above 1 means that indicator alone is breached.`;
+  let h="<tr><th>Material</th>"+S.indicators.map(i=>`<th style="text-align:center">${esc(i.name)}</th>`).join("")+"</tr>";
+  for(const m of S.materials){ const D=nz(m.demand); h+=`<tr><td>${esc(m.name)}</td>`;
+    for(const i of S.indicators){ const r=R.rows.find(x=>x.p===prin&&x.mat===m.name&&x.ind===i.name), q=D/r.annual;
+      if(!isFinite(r.annual)) h+=`<td style="background:repeating-linear-gradient(45deg,var(--line) 0 3px,transparent 3px 6px);color:var(--muted)">gap</td>`;
+      else if(!isFinite(q)) h+=`<td style="color:var(--muted)">${fT(r.annual)}<br>no demand</td>`;
+      else { const bg=q<=1?"color-mix(in srgb,var(--good) 22%,var(--surface))":`color-mix(in srgb,var(--crit) ${q<=2?30:q<=10?60:90}%,var(--surface))`;
+        h+=`<td style="background:${bg};${q>10?"color:#fff;":""}"><b>${nf(2).format(q)}×</b><br>${fT(r.annual)}</td>`; } }
+    h+="</tr>"; }
+  $("tHeat").innerHTML=h;
+}
+function tipAttr(t){ return ` tabindex="0" data-tip="${esc(t)}"`; }
+function chartCorridor(R){
+  const mats=S.materials.filter(m=>R.binding.some(b=>b.mat===m.name));
+  if(!mats.length) return "<p>No material has a complete calculation yet.</p>";
+  const L=128, Rr=150, rowH=26, headH=30, padB=40; let y=0, out="";
+  for(const m of mats){
+    const bs=PRIN.map(p=>R.binding.find(b=>b.p===p&&b.mat===m.name));
+    const D=nz(m.demand), max=Math.max(...bs.filter(Boolean).map(b=>b.budget), isFinite(D)?D:0)||1;
+    const sx=v=>L+(W-L-Rr)*v/max;
+    out+=`<text x="0" y="${y+16}" font-size="14" font-weight="600">${esc(m.name)}</text>`;
+    for(const t of ticks(max)){ const x=sx(t); out+=`<line x1="${x}" x2="${x}" y1="${y+headH}" y2="${y+headH+rowH*3}" stroke="var(--line)"/><text x="${x}" y="${y+headH+rowH*3+14}" font-size="10.5" text-anchor="middle" style="fill:var(--muted)">${fT(t)}</text>`; }
+    out+=`<line x1="${L}" x2="${L}" y1="${y+headH-4}" y2="${y+headH+rowH*3}" stroke="var(--line)"/>`;
+    bs.forEach((b,k)=>{ const yy=y+headH+k*rowH;
+      out+=`<text x="${L-8}" y="${yy+14}" font-size="12" text-anchor="end" fill="var(--muted)" style="fill:var(--muted)">${PRIN[k]}</text>`;
+      if(!b){ out+=`<text x="${L+6}" y="${yy+14}" font-size="12" style="fill:var(--muted)">data gap</text>`; return; }
+      const w=Math.max(2,sx(b.budget)-L);
+      out+=`<rect x="${L}" y="${yy+3}" width="${w}" height="14" fill="${PCOL[k]}"${tipAttr(`${m.name}, ${PRIN[k]}. ${fT(b.budget)} per year. Binding indicator ${b.ind}. ${b.n} indicator${b.n>1?"s":""} assessed.`)}/>`;
+      out+=`<text x="${L+w+6}" y="${yy+14}" font-size="12">${fT(b.budget)} (${esc(b.ind)})</text>`; });
+    if(isFinite(D)){ const x=sx(D);
+      out+=`<line x1="${x}" x2="${x}" y1="${y+headH-6}" y2="${y+headH+rowH*3}" stroke="var(--ink)" stroke-dasharray="4 3" stroke-width="1.5"/>`;
+      out+=`<text x="${x-4}" y="${y+headH-9}" font-size="11.5" text-anchor="end">demand ${fT(D)}</text>`; }
+    y+=headH+rowH*3+padB;
+  }
+  return `<svg viewBox="0 0 ${W} ${y}" role="img" aria-label="Binding budget by material and allocation principle">${out}</svg>`;
+}
+function chartIndicators(R,mat,prin){
+  const m=S.materials.find(x=>x.name===mat); if(!m) return "";
+  const rs=R.rows.filter(r=>r.p===prin&&r.mat===mat&&isFinite(r.annual)).sort((a,b)=>a.annual-b.annual);
+  if(!rs.length) return "<p>No indicator has complete data for this material under this principle.</p>";
+  const L=140, Rr=130, rowH=28, top=22, D=nz(m.demand), max=Math.max(...rs.map(r=>r.annual),isFinite(D)?D:0);
+  const sx=v=>L+(W-L-Rr)*v/max, H=top+rs.length*rowH+8; let out=`<line x1="${L}" x2="${L}" y1="${top-4}" y2="${H-6}" stroke="var(--line)"/>`;
+  rs.forEach((r,k)=>{ const yy=top+k*rowH, w=Math.max(2,sx(r.annual)-L), bind=k===0;
+    out+=`<text x="${L-8}" y="${yy+15}" font-size="12" text-anchor="end" style="fill:var(--muted)">${esc(r.ind)}</text>`;
+    out+=`<rect x="${L}" y="${yy+4}" width="${w}" height="14" fill="${bind?"var(--crit)":"var(--neutral)"}"${tipAttr(`${r.ind} allows ${fT(r.annual)} of ${mat} per year${bind?". This is the binding indicator":""}.`)}/>`;
+    out+=`<text x="${L+w+6}" y="${yy+15}" font-size="12" ${bind?'font-weight="600"':""}>${fT(r.annual)}${bind?" binding":""}</text>`; });
+  if(isFinite(D)){ const x=sx(D); out+=`<line x1="${x}" x2="${x}" y1="${top-6}" y2="${H-6}" stroke="var(--ink)" stroke-dasharray="4 3" stroke-width="1.5"/><text x="${x-4}" y="${top-9}" font-size="11.5" text-anchor="end">demand ${fT(D)}</text>`; }
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tonnes allowed by each indicator">${out}</svg>`;
+}
+function chartOvershoot(R){
+  const pts=R.binding.filter(b=>isFinite(b.ratio)&&b.ratio>0);
+  if(!pts.length) return "<p>Add a demand figure to a material to see its overshoot ratio.</p>";
+  const mats=[...new Set(pts.map(b=>b.mat))], L=140, Rr=30, rowH=34, top=26;
+  const lo=Math.floor(Math.log10(Math.min(0.5,...pts.map(b=>b.ratio)))), hi=Math.ceil(Math.log10(Math.max(2,...pts.map(b=>b.ratio))));
+  const sx=v=>L+(W-L-Rr)*(Math.log10(v)-lo)/(hi-lo), H=top+mats.length*rowH+30; let out="";
+  for(let e=lo;e<=hi;e++){ const x=sx(10**e), one=e===0;
+    out+=`<line x1="${x}" x2="${x}" y1="${top-6}" y2="${H-26}" stroke="${one?"var(--ink)":"var(--line)"}" stroke-width="${one?1.5:1}"/>`;
+    out+=`<text x="${x}" y="${H-10}" font-size="11.5" text-anchor="middle" style="fill:var(--muted)">${10**e>=1?10**e:(10**e).toFixed(-e)}</text>`; }
+  out+=`<text x="${sx(1)+5}" y="${top-10}" font-size="11.5">fair budget = 1</text>`;
+  mats.forEach((mn,k)=>{ const yy=top+k*rowH+rowH/2;
+    out+=`<text x="${L-10}" y="${yy+4}" font-size="12.5" text-anchor="end">${esc(mn)}</text>`;
+    out+=`<line x1="${L}" x2="${W-Rr}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-dasharray="1 4"/>`;
+    PRIN.forEach((p,j)=>{ const b=pts.find(q=>q.mat===mn&&q.p===p); if(!b) return;
+      out+=`<circle cx="${sx(b.ratio)}" cy="${yy+(j-1)*7}" r="6" fill="${PCOL[j]}" stroke="var(--surface)" stroke-width="2"${tipAttr(`${mn}, ${p}. Ratio ${nf(2).format(b.ratio)}. Demand ${fT(b.D)} against a budget of ${fT(b.budget)}. Reduction needed ${pct(b.red)}.`)}/>`; }); });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Overshoot ratio by material and principle">${out}</svg>`;
+}
+
+/* ---------- outputs ---------- */
+function renderOut(){
+  const space=$("space").value, R=compute(S,space), mat=$("selMat").value, prin=$("selPrin").value;
+  const ind=$("selInd").value;
+  $("c0cap").textContent=`How the ${ind.toLowerCase()} space narrows to a ${mat?mat.toLowerCase():"material"} budget under ${prin}. Read left to right.`;
+  $("c0").innerHTML=chartAlloc(R,mat,prin,ind); renderHeat(R,prin,space); renderMap(R,mat,prin);
+  renderHero(R,mat,prin,ind);
+  const leg=PRIN.map((p,k)=>`<span><i style="background:${PCOL[k]}"></i>${p}</span>`).join("");
+  $("leg1").innerHTML=leg+'<span><i class="ln"></i>Projected demand</span>'; $("leg3").innerHTML=leg;
+  $("c1").innerHTML=chartCorridor(R); $("c3").innerHTML=chartOvershoot(R);
+  $("c2cap").textContent=`${mat||"No material"} under ${prin}. Each bar is the tonnage one indicator allows. The shortest bar sets the binding budget.`;
+  $("c2").innerHTML=chartIndicators(R,mat,prin);
+  // overshoot table
+  let h="<tr><th>Material</th><th>Principle</th><th>Binding indicator</th><th class='n'>Budget per year</th><th class='n'>kg per person</th><th class='n'>Demand</th><th class='n'>Ratio</th><th class='n'>Reduction</th><th class='n'>Gap</th><th>Status</th></tr>";
+  for(const m of S.materials) for(const p of PRIN){ const b=R.binding.find(x=>x.mat===m.name&&x.p===p);
+    if(!b){ h+=`<tr><td>${esc(m.name)}</td><td>${p}</td><td colspan="7" style="color:var(--muted)">No complete indicator</td><td><span class="pill gap">Data gap</span></td></tr>`; continue; }
+    const st=!isFinite(b.ratio)?'<span class="pill gap">No demand</span>':b.ratio>1?'<span class="pill bad">Overshoot</span>':'<span class="pill ok">Within budget</span>';
+    h+=`<tr><td>${esc(b.mat)}</td><td>${p}</td><td>${esc(b.ind)} <span style="color:var(--muted)">(${b.n} assessed)</span></td><td class="n">${fT(b.budget)}</td><td class="n">${nf(1).format(b.perCap)}</td><td class="n">${isFinite(b.D)?fT(b.D):""}</td><td class="n">${isFinite(b.ratio)?nf(2).format(b.ratio):""}</td><td class="n">${isFinite(b.ratio)?pct(b.red):""}</td><td class="n">${isFinite(b.ratio)?fT(b.gap):""}</td><td>${st}</td></tr>`; }
+  $("tOver").innerHTML=h; window._csv=R.binding;
+  // matrix
+  $("matrixCap").textContent=`${prin}, ${space}, tonnes per year. The lowest value in each row is marked.`;
+  h="<tr><th>Material</th>"+S.indicators.map(i=>`<th class="n">${esc(i.name)}</th>`).join("")+"</tr>";
+  for(const m of S.materials){ const rs=S.indicators.map(i=>R.rows.find(r=>r.p===prin&&r.mat===m.name&&r.ind===i.name));
+    const min=Math.min(...rs.filter(r=>isFinite(r.annual)).map(r=>r.annual));
+    h+=`<tr><td>${esc(m.name)}</td>`+rs.map(r=>isFinite(r.annual)?`<td class="n"${r.annual===min?' style="font-weight:600;color:var(--crit)"':""}>${fT(r.annual)}</td>`:`<td class="n" style="color:var(--muted)">gap</td>`).join("")+"</tr>"; }
+  $("tMatrix").innerHTML=h;
+  // audit
+  h="<tr><th>Step</th><th>Quantity</th>"+S.indicators.map(i=>`<th class="n">${esc(i.name)}</th>`).join("")+"</tr>";
+  const A=S.indicators.map(i=>R.rows.find(r=>r.p===prin&&r.mat===mat&&r.ind===i.name)).filter(Boolean);
+  const line=(s,q,fn)=>`<tr><td>${s}</td><td>${q}</td>`+A.map(r=>`<td class="n">${fn(r)}</td>`).join("")+"</tr>";
+  if(A.length){
+    h+=line("1","Global space, in the indicator unit",r=>fN(r.X))+line("2","× population share",r=>(r.share*100).toFixed(4)+"%")
+     +line("2","× capability factor",r=>nf(2).format(r.cap))+line("2","= Spain budget",r=>fN(r.spain))
+     +line("3",prin==="Human needs"?"× needs share":"× building share",r=>pct(r.bs))
+     +line("3","= building budget"+(A.some(r=>r.capped)?" (capped by local capacity where lower)":""),r=>fN(r.bld))
+     +line("4","× group share",r=>pct(r.g))+line("4","× share within group",r=>pct(r.ws))+line("4","= material environmental budget",r=>fN(r.env))
+     +line("5","÷ impact per tonne",r=>fN(r.IF))+line("5","= cumulative budget",r=>fT(r.cum))
+     +line("5","÷ budget period, years",r=>r.yrs)+line("5","= annual budget",r=>`<b>${fT(r.annual)}</b>`);
+  }
+  $("tAudit").innerHTML=h;
+  // share checks
+  h="<tr><th>Indicator</th><th class='n'>Sum of group shares</th><th>Within-group sums</th><th>Status</th></tr>";
+  for(const i of S.indicators){ const gs=S.groupShares[i.name]||{}; const sum=S.groups.reduce((a,g)=>a+(ok(gs[g])?+gs[g]:0),0);
+    const within=S.groups.map(g=>{ const s=S.materials.filter(m=>m.group===g).reduce((a,m)=>a+(ok(((S.factors[i.name]||{})[m.name]||{}).share)?+S.factors[i.name][m.name].share:0),0); return s>0?`${g} ${pct(s)}`:null; }).filter(Boolean);
+    const over=sum>1.0001||S.groups.some(g=>S.materials.filter(m=>m.group===g).reduce((a,m)=>a+(ok(((S.factors[i.name]||{})[m.name]||{}).share)?+S.factors[i.name][m.name].share:0),0)>1.0001);
+    const full=Math.abs(sum-1)<1e-4;
+    h+=`<tr><td>${esc(i.name)}</td><td class="n">${pct(sum)}</td><td>${within.join(", ")||"none entered"}</td><td>${over?'<span class="pill bad">Over 100%</span>':full?'<span class="pill ok">Fully allocated</span>':`<span class="pill gap">${pct(1-sum)} unallocated</span>`}</td></tr>`; }
+  $("tShares").innerHTML=h;
+  // gaps
+  const gaps=R.rows.filter(r=>r.p===prin&&!isFinite(r.annual));
+  $("gapSum").textContent=`Data gaps under ${prin}. ${gaps.length} of ${S.indicators.length*S.materials.length} pairs cannot be calculated`;
+  $("tGaps").innerHTML="<tr><th>Indicator</th><th>Material</th><th>Missing input</th></tr>"+gaps.map(r=>{
+    const miss=[[r.bs,prin==="Human needs"?"needs share":"building share"],[r.g,"group share"],[r.ws,"share within group"],[r.IF,"impact per tonne"],[r.X,"global space"]].filter(x=>!isFinite(x[0])).map(x=>x[1]).join(", ");
+    return `<tr><td>${esc(r.ind)}</td><td>${esc(r.mat)}</td><td>${miss}</td></tr>`; }).join("");
+}
+
+function renderHero(R,mat,prin,ind){
+  const b=R.binding.find(x=>x.mat===mat&&x.p===prin), r=R.rows.find(x=>x.p===prin&&x.mat===mat&&x.ind===ind)||{};
+  const tile=(k,v,u,cls)=>`<div class="tile ${cls||""}"><span>${k}</span><b>${v}<i>${u||""}</i></b></div>`;
+  const bb=big(b?b.budget:NaN), dd=big(b?b.D:NaN), over=b&&isFinite(b.ratio);
+  $("tiles").innerHTML=tile("Fair budget a year",bb[0],bb[1],"y")+tile("Projected demand",dd[0],dd[1])
+    +tile("Overshoot",over?nf(2).format(b.ratio):"–",over?"×":"",over&&b.ratio>1?"r":"g")+tile("Cut needed",over?nf(0).format(b.red*100):"–",over?"%":"")
+    +tile("Binding limit",b?esc(b.ind):"–","","b")+tile("Per person",b?nf(1).format(b.perCap):"–",b?"kg":"");
+  const u=r.unit||"", v=x=>isFinite(x)?fN(x):"gap";
+  const st=(n,name,f,res,unit)=>`<div class="st"><em>${n}</em><h4>${name}</h4><code>${f}</code><b>${res}</b><span>${unit}</span></div>`;
+  $("steps").innerHTML=
+    st(1,"Global space",`${v(r.X)}<br>full − used`,v(r.X),u)
+   +st(2,"Spain",`× ${isFinite(r.share)?(r.share*100).toFixed(2):"?"}% of people`+(r.cap&&r.cap!==1?`<br>× ${nf(2).format(r.cap)} capability`:""),v(r.spain),u)
+   +st(3,"Buildings",`× ${pct(r.bs)} ${prin==="Human needs"?"needs share":"sector share"}`+(r.capped?"<br>capped locally":""),v(r.bld),u)
+   +st(4,esc(mat||"Material"),`× ${pct(r.g)} group<br>× ${pct(r.ws)} in group`,v(r.env),u)
+   +st(5,"Tonnes",`÷ ${v(r.IF)} ${esc(u)} per t`+(r.yrs>1?`<br>÷ ${r.yrs} years`:""),fT(r.annual),"allowed by "+esc(ind.toLowerCase()))
+   +st(6,"Gap",b&&over?`${fT(b.D)} demand<br>÷ ${fT(b.budget)} binding`:"demand ÷ binding budget",over?nf(2).format(b.ratio)+"×":"–",b?"binding limit is "+esc(b.ind.toLowerCase()):"");
+}
+
+/* ---------- events ---------- */
+$("addMat").addEventListener("click",()=>{ const n=$("newMat").value.trim(); if(!n||S.materials.some(m=>m.name.toLowerCase()===n.toLowerCase())) { $("newMat").focus(); return; }
+  S.materials.push({name:n,group:$("newGrp").value,demand:null}); $("newMat").value=""; renderInputs(); renderOut(); });
+$("reset").addEventListener("click",()=>{ S=clone(DEFAULT); curInd=0; renderInputs(); renderOut(); });
+["space","selMat","selPrin","selInd"].forEach(id=>$(id).addEventListener("change",renderOut));
+$("copy").addEventListener("click",()=>{ const rows=[["material","principle","binding_indicator","annual_budget_t","demand_t","overshoot_ratio","reduction_needed","gap_t"]]
+  .concat((window._csv||[]).map(b=>[b.mat,b.p,b.ind,b.budget,isFinite(b.D)?b.D:"",isFinite(b.ratio)?b.ratio:"",isFinite(b.ratio)?b.red:"",isFinite(b.ratio)?b.gap:""]));
+  const txt=rows.map(r=>r.join(",")).join("\n");
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>$("copied").textContent="Copied.",()=>$("copied").textContent="Copy was blocked by the browser. Select the table and copy it by hand."); });
+const tip=$("tip");
+function showTip(e){ const t=e.target.closest&&e.target.closest("[data-tip]"); if(!t){ tip.style.opacity=0; return; }
+  tip.textContent=t.dataset.tip; tip.style.opacity=1; const r=t.getBoundingClientRect();
+  tip.style.left=Math.min(window.innerWidth-270,Math.max(8,r.left))+"px"; tip.style.top=Math.max(8,r.top-tip.offsetHeight-8)+"px"; }
+document.addEventListener("mouseover",showTip); document.addEventListener("focusin",showTip);
+document.addEventListener("mouseout",e=>{ if(e.target.closest&&e.target.closest("[data-tip]")) tip.style.opacity=0; });
+renderInputs(); renderOut();
+fetch("spain.json").then(r=>r.json()).then(j=>{GEO=j; renderOut();}).catch(()=>renderOut());
+</script>
+</body>
+</html>
