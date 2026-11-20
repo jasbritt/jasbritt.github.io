@@ -20,6 +20,11 @@ header{background:var(--y);border-bottom:3px solid var(--ink)}
 header .wrap{padding-top:34px;padding-bottom:30px}
 .tag{display:inline-block;background:var(--ink);color:var(--y);font-family:var(--mono);font-size:12.5px;padding:4px 10px;margin-bottom:16px}
 h1{font-family:var(--display);font-stretch:125%;font-weight:900;font-size:clamp(40px,8.4vw,116px);line-height:.92;letter-spacing:-.02em;margin:0;text-transform:uppercase;text-wrap:balance}
+header .wrap{position:relative}
+.lang{position:absolute;top:22px;right:20px;display:flex;border:3px solid var(--ink)}
+.lang button{background:var(--y);color:var(--ink);padding:7px 13px;font-family:var(--mono);font-size:13px;font-weight:500}
+.lang button[aria-pressed=true]{background:var(--ink);color:var(--y)}
+@media (max-width:560px){.lang{position:static;width:max-content;margin-bottom:14px}}
 header p{font-size:clamp(17px,2vw,22px);font-weight:500;max-width:40ch;margin:18px 0 0}
 .ctl{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff}
 .ctl .wrap{display:flex;flex-wrap:wrap;gap:10px 18px;padding-top:10px;padding-bottom:10px}
@@ -89,6 +94,7 @@ footer{margin:50px 0 60px;font-size:13px;color:var(--muted);max-width:90ch}
 </head>
 <body>
 <header><div class="wrap">
+  <div class="lang" role="group" aria-label="Language"><button type="button" data-l="en" aria-pressed="true">EN</button><button type="button" data-l="es" aria-pressed="false">ES</button></div>
   <span class="tag">TEAM A · FIBE3 × RAMBOLL × GBCe · SPAIN</span>
   <h1>Fair material budgets</h1>
   <p>How much can Spain build with, inside a fair share of the planet's limits?</p>
@@ -216,13 +222,150 @@ function compute(S, space){
 }
 
 /* ---------- formatting ---------- */
-const nf = (d)=>new Intl.NumberFormat("en-GB",{maximumFractionDigits:d,minimumFractionDigits:d});
+let LANG="en"; const loc=()=>LANG==="es"?"es-ES":"en-GB";
+const nf = (d)=>new Intl.NumberFormat(loc(),{maximumFractionDigits:d,minimumFractionDigits:d});
 function fT(t){ if(!isFinite(t)) return "gap"; const a=Math.abs(t);
   if(a>=1e6) return nf(2).format(t/1e6)+" Mt"; if(a>=1e3) return nf(1).format(t/1e3)+" kt"; return nf(0).format(t)+" t"; }
 function fN(v,unit){ if(!isFinite(v)) return "gap";
-  return new Intl.NumberFormat("en-GB",{maximumSignificantDigits:4}).format(v)+(unit?" "+unit:""); }
+  return new Intl.NumberFormat(loc(),{maximumSignificantDigits:4}).format(v)+(unit?" "+unit:""); }
 const pct = v => isFinite(v) ? nf(1).format(v*100)+"%" : "gap";
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- Spanish. Every visible string has an entry here. Add one for any new text. ---------- */
+const ES = {
+ "TEAM A · FIBE3 × RAMBOLL × GBCe · SPAIN":"EQUIPO A · FIBE3 × RAMBOLL × GBCe · ESPAÑA",
+ "Fair material budgets":"Presupuestos justos de materiales",
+ "How much can Spain build with, inside a fair share of the planet's limits?":"¿Con cuánto puede construir España dentro de una parte justa de los límites del planeta?",
+ "Material":"Material","Fairness rule":"Criterio de equidad","Limit":"Límite","Space":"Espacio","Language":"Idioma",
+ "Equal per capita":"Igual per cápita","Ability to pay":"Capacidad de pago","Human needs":"Necesidades humanas",
+ "Climate":"Clima","Water":"Agua","Biodiversity":"Biodiversidad","Toxicity":"Toxicidad","Material footprint":"Huella material",
+ "Cement":"Cemento","Steel":"Acero","Aluminium":"Aluminio","Timber":"Madera","Chemical product":"Producto químico",
+ "Mineral":"Minerales","Metals":"Metales","Bio-based":"De base biológica","Chemicals":"Químicos",
+ "From the planet to one material":"Del planeta a un material","The fairness corridor":"El corredor de equidad",
+ "Binding budget under each fairness rule. Dashed line is demand.":"Presupuesto limitante según cada criterio de equidad. La línea discontinua es la demanda.",
+ "Which limit bites first":"Qué límite se alcanza primero","How far over":"Cuánto se supera",
+ "Demand ÷ binding budget, log scale. Right of 1 is overshoot.":"Demanda ÷ presupuesto limitante, escala logarítmica. A la derecha de 1 hay exceso.",
+ "Every material against every limit":"Cada material frente a cada límite",
+ "Within budget":"Dentro del presupuesto","Up to 2×":"Hasta 2×","2 to 10×":"De 2 a 10×","Over 10×":"Más de 10×","No data yet":"Sin datos todavía",
+ "The budget across Spain":"El presupuesto en España","How it was calculated":"Cómo se calculó",
+ "space = full space − used space":"espacio = espacio total − espacio usado",
+ "Spain = space × Spain's people ÷ world's people":"España = espacio × población de España ÷ población mundial",
+ "ability to pay = Spain × world GDP per head ÷ Spain GDP per head":"capacidad de pago = España × PIB per cápita mundial ÷ PIB per cápita de España",
+ "buildings = Spain × buildings' share of that pressure":"edificación = España × cuota de la edificación en esa presión",
+ "human needs swaps in the needs share":"necesidades humanas usa la cuota de necesidades",
+ "material = buildings × group share × share in group":"material = edificación × cuota del grupo × cuota dentro del grupo",
+ "tonnes = material ÷ impact per tonne":"toneladas = material ÷ impacto por tonelada",
+ "binding budget = lowest tonnes across all limits":"presupuesto limitante = el menor tonelaje entre todos los límites",
+ "overshoot = demand ÷ binding budget":"exceso = demanda ÷ presupuesto limitante",
+ "Full working for this material":"Cálculo completo para este material","All results as a table":"Todos los resultados en tabla",
+ "Copy as CSV":"Copiar como CSV","Shares used":"Cuotas utilizadas","Data gaps":"Datos que faltan","Change the inputs":"Cambiar los datos de entrada",
+ "Country":"País","Materials and demand":"Materiales y demanda","New material":"Nuevo material","Group":"Grupo","Add material":"Añadir material",
+ "Reset":"Restablecer","By limit":"Por límite","Group shares":"Cuotas por grupo","Material shares and impact per tonne":"Cuotas por material e impacto por tonelada","Name":"Nombre",
+ "All inputs are the illustrative placeholder values from Chapter 10 and the Ramboll slides, to be replaced with verified Spanish data. Map populations are INE figures for 1 January 2025. Edits made here are lost on reload.":"Todos los datos de entrada son los valores ilustrativos provisionales del Capítulo 10 y de las diapositivas de Ramboll, que deben sustituirse por datos españoles verificados. Las poblaciones del mapa son cifras del INE a 1 de enero de 2025. Los cambios hechos aquí se pierden al recargar la página.",
+ "Fair budget a year":"Presupuesto justo anual","Projected demand":"Demanda prevista","Overshoot":"Exceso","Cut needed":"Recorte necesario","Binding limit":"Límite determinante","Per person":"Por persona",
+ "Global space":"Espacio global","Spain":"España","Buildings":"Edificación","Tonnes":"Toneladas","Gap":"Brecha","full − used":"total − usado","capped locally":"limitado por capacidad local",
+ "demand ÷ binding budget":"demanda ÷ presupuesto limitante",
+ "World":"Mundo","global space":"espacio global","national budget":"presupuesto nacional","sector budget":"presupuesto del sector","sector budget, capped locally":"presupuesto del sector, limitado localmente",
+ "group budget":"presupuesto del grupo","Rest of world":"Resto del mundo","Other sectors":"Otros sectores","Unallocated":"Sin asignar",
+ "Housing and essential infrastructure":"Vivienda e infraestructura esencial","Housing and essential…":"Vivienda e infraestr.",
+ "tonnes per year":"toneladas al año","Budget":"Presupuesto","Demand":"Demanda","data gap":"falta dato","share missing":"falta la cuota","see Data gaps below":"ver Datos que faltan",
+ "Choose a material and an indicator.":"Elija un material y un indicador.","The map data did not load.":"No se pudieron cargar los datos del mapa.",
+ "No material has a complete calculation yet.":"Ningún material tiene todavía un cálculo completo.",
+ "No indicator has complete data for this material under this principle.":"Ningún indicador tiene datos completos para este material con este criterio.",
+ "Add a demand figure to a material to see its overshoot ratio.":"Añada una cifra de demanda a un material para ver su ratio de exceso.",
+ "Canarias, inset":"Canarias, recuadro","Over 6 million people":"Más de 6 millones de personas","3 to 6 million":"De 3 a 6 millones","2 to 3 million":"De 2 a 3 millones","1 to 2 million":"De 1 a 2 millones","Under 1 million":"Menos de 1 millón",
+ "Community":"Comunidad","Share":"Cuota","gap":"sin dato","no demand":"sin demanda","fair budget = 1":"presupuesto justo = 1",
+ "Principle":"Criterio","Binding indicator":"Indicador limitante","Budget per year":"Presupuesto anual","kg per person":"kg por persona","Ratio":"Ratio","Reduction":"Reducción","Status":"Estado",
+ "No complete indicator":"Ningún indicador completo","Data gap":"Falta dato","No demand":"Sin demanda",
+ "Step":"Paso","Quantity":"Magnitud","Global space, in the indicator unit":"Espacio global, en la unidad del indicador","× population share":"× cuota de población","× capability factor":"× factor de capacidad",
+ "= Spain budget":"= presupuesto de España","× needs share":"× cuota de necesidades","× building share":"× cuota de la edificación","= building budget":"= presupuesto de la edificación",
+ "= building budget (capped by local capacity where lower)":"= presupuesto de la edificación (limitado por la capacidad local cuando es menor)",
+ "× group share":"× cuota del grupo","× share within group":"× cuota dentro del grupo","= material environmental budget":"= presupuesto ambiental del material","÷ impact per tonne":"÷ impacto por tonelada",
+ "= cumulative budget":"= presupuesto acumulado","÷ budget period, years":"÷ periodo del presupuesto, años","= annual budget":"= presupuesto anual",
+ "Indicator":"Indicador","Sum of group shares":"Suma de cuotas por grupo","Within-group sums":"Sumas dentro del grupo","none entered":"ninguna introducida","Over 100%":"Más del 100%","Fully allocated":"Totalmente asignado",
+ "Missing input":"Dato que falta","needs share":"cuota de necesidades","building share":"cuota de la edificación","group share":"cuota del grupo","share within group":"cuota dentro del grupo","impact per tonne":"impacto por tonelada",
+ "Population of Spain":"Población de España","World population":"Población mundial","GDP per capita, Spain":"PIB per cápita, España","GDP per capita, world":"PIB per cápita, mundo",
+ "Capability factor override (blank uses GDP ratio)":"Factor de capacidad fijado (en blanco usa el cociente de PIB)","Projected demand, t per year":"Demanda prevista, t al año","Remove":"Quitar",
+ "Budget period, years":"Periodo del presupuesto, años","Building impact share, 0 to 1":"Cuota de impacto de la edificación, de 0 a 1","Needs share, 0 to 1":"Cuota de necesidades, de 0 a 1",
+ "Share, 0 to 1":"Cuota, de 0 a 1","Share within group":"Cuota dentro del grupo","Copied.":"Copiado.",
+ "Copy was blocked by the browser. Select the table and copy it by hand.":"El navegador bloqueó la copia. Seleccione la tabla y cópiela a mano.",
+ "Allocation map from global space to tonnes of material":"Mapa de asignación del espacio global a toneladas de material","Map of Spain by autonomous community":"Mapa de España por comunidad autónoma",
+ "Binding budget by material and allocation principle":"Presupuesto limitante por material y criterio de asignación","Tonnes allowed by each indicator":"Toneladas permitidas por cada indicador",
+ "Overshoot ratio by material and principle":"Ratio de exceso por material y criterio","Fair Material Budgets Team A Guide":"Presupuestos justos de materiales. Guía del Equipo A"
+};
+const ESL = {}; for (const k in ES) ESL[k.toLowerCase()] = ES[k];
+const nm = x => ES[x] !== undefined ? ES[x] : x;
+const nmL = x => ESL[x.toLowerCase()] !== undefined ? ESL[x.toLowerCase()].toLowerCase() : x;
+const TQ = "(?:Mt|kt|t)";
+const RULES = [
+ [/^How the (.+) space narrows to a (.+) budget under (.+)\. Read left to right\.$/, (a,b,c)=>`Cómo el espacio de ${nmL(a)} se reduce a un presupuesto de ${nmL(b)} con el criterio ${nm(c)}. Se lee de izquierda a derecha.`],
+ [/^(.+) under (.+)\. Each bar is the tonnage one indicator allows\. The shortest bar sets the binding budget\.$/, (a,b)=>`${nm(a)} con el criterio ${nm(b)}. Cada barra es el tonelaje que permite un indicador. La barra más corta fija el presupuesto limitante.`],
+ [/^Demand divided by the tonnage each indicator allows, under (.+) and (.+)\. A value above 1 means that indicator alone is breached\.$/, (a,b)=>`Demanda dividida por el tonelaje que permite cada indicador, con ${nm(a)} y ${b}. Un valor superior a 1 significa que ese indicador por sí solo se supera.`],
+ [/^(.+) under (.+)\. The national binding budget of (.+) per year, set by (.+), divided between the autonomous communities by population\.$/, (a,b,c,d)=>`${nm(a)} con el criterio ${nm(b)}. El presupuesto limitante nacional de ${c} al año, fijado por ${nmL(d)}, repartido entre las comunidades autónomas según su población.`],
+ [/^(.+) has no complete budget under (.+)\. The map shows population only\.$/, (a,b)=>`${nm(a)} no tiene un presupuesto completo con el criterio ${nm(b)}. El mapa muestra solo la población.`],
+ [/^(.+), (RSOS|FSOS), tonnes per year\. The lowest value in each row is marked\.$/, (a,b)=>`${nm(a)}, ${b}, toneladas al año. Se marca el valor más bajo de cada fila.`],
+ [/^Data gaps under (.+)\. (\d+) of (\d+) pairs cannot be calculated$/, (a,b,c)=>`Datos que faltan con ${nm(a)}. ${b} de ${c} pares no se pueden calcular`],
+ [/^(.+) allows (.+) of (.+) per year\. Material budget (.+) divided by (.+) per tonne(?:, spread over (\d+) years)?\.$/, (a,b,c,d,e,f)=>`${nm(a)} permite ${b} de ${nm(c)} al año. Presupuesto del material ${d} dividido entre ${e} por tonelada${f?`, repartido en ${f} años`:""}.`],
+ [/^(.+) allows (.+) of (.+) per year(\. This is the binding indicator)?\.$/, (a,b,c,d)=>`${nm(a)} permite ${b} de ${nm(c)} al año${d?". Es el indicador limitante":""}.`],
+ [/^Projected demand (.+)\. Ratio to this indicator's budget (.+)\.$/, (a,b)=>`Demanda prevista ${a}. Ratio respecto al presupuesto de este indicador ${b}.`],
+ [/^(.+)\. (.+) residents, (.+) of Spain\. Share of the (.+) budget (.+) per year\.$/, (a,b,c,d,e)=>`${a}. ${b} residentes, ${c} de España. Parte del presupuesto de ${nmL(d)}: ${e} al año.`],
+ [/^(.+)\. (.+) residents, (.+) of Spain\. No complete budget for this material yet\.$/, (a,b,c)=>`${a}. ${b} residentes, ${c} de España. Todavía no hay un presupuesto completo para este material.`],
+ [/^(.+)\. (.+) residents\.$/, (a,b)=>`${a}. ${b} residentes.`],
+ [/^(.+), (.+)\. (.+) per year\. Binding indicator (.+)\. (\d+) indicators? assessed\.$/, (a,b,c,d,e)=>`${nm(a)}, ${nm(b)}. ${c} al año. Indicador limitante ${nmL(d)}. ${e} ${+e>1?"indicadores evaluados":"indicador evaluado"}.`],
+ [/^(.+), (.+)\. Ratio (.+)\. Demand (.+) against a budget of (.+)\. Reduction needed (.+)\.$/, (a,b,c,d,e,f)=>`${nm(a)}, ${nm(b)}. Ratio ${c}. Demanda ${d} frente a un presupuesto de ${e}. Reducción necesaria ${f}.`],
+ [/^(.+)\. (.+) of (.+), which is (.+)\.$/, (a,b,c,d)=>`${nm(a)}. ${b} de ${nmL(c)}, es decir, ${d}.`],
+ [/^× (.+)% of people$/, a=>`× ${a}% de la población`],
+ [/^× (.+) capability$/, a=>`× ${a} capacidad`],
+ [/^× (.+) sector share$/, a=>`× ${a} cuota del sector`],
+ [/^× (.+) needs share$/, a=>`× ${a} cuota de necesidades`],
+ [/^× (.+) in group$/, a=>`× ${a} dentro del grupo`],
+ [/^× (.+) group$/, a=>`× ${a} grupo`],
+ [/^÷ (.+) per t$/, a=>`÷ ${a} por t`],
+ [/^÷ (\d+) years$/, a=>`÷ ${a} años`],
+ [new RegExp(`^÷ (.+ ${TQ}) binding$`), a=>`÷ ${a} limitante`],
+ [new RegExp(`^(.+ ${TQ}) binding$`), a=>`${a} limitante`],
+ [new RegExp(`^(.+ ${TQ}) demand$`), a=>`${a} demanda`],
+ [/^demand (.+)$/, a=>`demanda ${a}`],
+ [/^allowed by (.+)$/, a=>`permitido por ${nmL(a)}`],
+ [/^binding limit is (.+)$/, a=>`el límite determinante es ${nmL(a)}`],
+ [/^\((\d+) assessed\)$/, a=>`(${a} ${+a>1?"evaluados":"evaluado"})`],
+ [/^(.+%) unallocated$/, a=>`${a} sin asignar`],
+ [/^Full space, (.+)$/, a=>`Espacio total, ${a}`],
+ [/^Occupied space, (.+)$/, a=>`Espacio ocupado, ${a}`],
+ [/^Local capacity for buildings, (.+)$/, a=>`Capacidad local para la edificación, ${a}`],
+ [/^Impact, (.+) per t$/, a=>`Impacto, ${a} por t`],
+ [/^Group for (.+)$/, a=>`Grupo de ${nm(a)}`],
+ [/^Demand for (.+)$/, a=>`Demanda de ${nm(a)}`],
+ [/^Remove (.+)$/, a=>`Quitar ${nm(a)}`],
+ [/^(.+) share within group$/, a=>`Cuota de ${nm(a)} dentro del grupo`],
+ [/^(.+) impact per tonne$/, a=>`Impacto por tonelada de ${nm(a)}`],
+ [/^(.+) share$/, a=>`Cuota de ${nm(a)}`],
+ [/^(.+) \((.+)\)$/, (a,b)=>`${nm(a)} (${nm(b)})`],
+ [/^(.+?) (\d[\d.,]*%)$/, (a,b)=>`${nm(a)} ${b}`]
+];
+function tr(s){
+  if (LANG !== "es") return s;
+  const m = s.match(/^(\s*)([\s\S]*?)(\s*)$/), core = m[2];
+  if (!core) return s;
+  if (ES[core] !== undefined) return m[1] + ES[core] + m[3];
+  if (core.includes(", ")) { const parts = core.split(", "); if (parts.every(p => ES[p] !== undefined || /^(.+?) (\d[\d.,]*%)$/.test(p))) return m[1] + parts.map(p => tr(p)).join(", ") + m[3]; }
+  for (const [re, fn] of RULES) { const k = core.match(re); if (k) return m[1] + fn(...k.slice(1)) + m[3]; }
+  return s;
+}
+const ATTRS = ["data-tip","aria-label","placeholder"];
+function localise(){
+  document.querySelectorAll("option").forEach(o => { if (!o.hasAttribute("value")) o.setAttribute("value", o.textContent); });
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n => /^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  let n; while ((n = w.nextNode())) { if (n.__en === undefined) n.__en = n.nodeValue; const t = tr(n.__en); if (n.nodeValue !== t) n.nodeValue = t; }
+  document.querySelectorAll("[data-tip],[aria-label],[placeholder]").forEach(e => { e.__a = e.__a || {};
+    for (const a of ATTRS) if (e.hasAttribute(a)) { if (e.__a[a] === undefined) e.__a[a] = e.getAttribute(a); e.setAttribute(a, tr(e.__a[a])); } });
+  document.documentElement.lang = LANG === "es" ? "es" : "en-GB";
+  document.title = tr("Fair Material Budgets Team A Guide");
+  document.querySelectorAll(".lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === LANG));
+}
+function setLang(l){ LANG = l; try { localStorage.setItem("fmb-lang", l); } catch (e) {} renderInputs(); renderOut(); }
+document.querySelectorAll(".lang button").forEach(b => b.addEventListener("click", () => setLang(b.dataset.l)));
+try { if (localStorage.getItem("fmb-lang") === "es") LANG = "es"; } catch (e) {}
 
 /* ---------- inputs ---------- */
 function numInput(id,val,on){ const e=document.createElement("input"); e.type="number"; e.step="any"; e.id=id; e.value=ok(val)?val:"";
@@ -272,6 +415,7 @@ function renderInputs(){
   if (S.materials.some(m=>m.name===keep)) sm.value=keep;
   if(!$("selPrin").options.length) $("selPrin").innerHTML=PRIN.map(p=>`<option>${p}</option>`).join("");
   if(!$("selInd").options.length) $("selInd").innerHTML=S.indicators.map(i=>`<option>${esc(i.name)}</option>`).join("");
+  localise();
 }
 
 /* ---------- charts ---------- */
@@ -466,6 +610,7 @@ function renderOut(){
   $("tGaps").innerHTML="<tr><th>Indicator</th><th>Material</th><th>Missing input</th></tr>"+gaps.map(r=>{
     const miss=[[r.bs,prin==="Human needs"?"needs share":"building share"],[r.g,"group share"],[r.ws,"share within group"],[r.IF,"impact per tonne"],[r.X,"global space"]].filter(x=>!isFinite(x[0])).map(x=>x[1]).join(", ");
     return `<tr><td>${esc(r.ind)}</td><td>${esc(r.mat)}</td><td>${miss}</td></tr>`; }).join("");
+  localise();
 }
 
 function renderHero(R,mat,prin,ind){
@@ -494,7 +639,7 @@ $("reset").addEventListener("click",()=>{ S=clone(DEFAULT); curInd=0; renderInpu
 $("copy").addEventListener("click",()=>{ const rows=[["material","principle","binding_indicator","annual_budget_t","demand_t","overshoot_ratio","reduction_needed","gap_t"]]
   .concat((window._csv||[]).map(b=>[b.mat,b.p,b.ind,b.budget,isFinite(b.D)?b.D:"",isFinite(b.ratio)?b.ratio:"",isFinite(b.ratio)?b.red:"",isFinite(b.ratio)?b.gap:""]));
   const txt=rows.map(r=>r.join(",")).join("\n");
-  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>$("copied").textContent="Copied.",()=>$("copied").textContent="Copy was blocked by the browser. Select the table and copy it by hand."); });
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>$("copied").textContent=tr("Copied."),()=>$("copied").textContent=tr("Copy was blocked by the browser. Select the table and copy it by hand.")); });
 const tip=$("tip");
 function showTip(e){ const t=e.target.closest&&e.target.closest("[data-tip]"); if(!t){ tip.style.opacity=0; return; }
   tip.textContent=t.dataset.tip; tip.style.opacity=1; const r=t.getBoundingClientRect();
