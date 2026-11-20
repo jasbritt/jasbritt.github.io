@@ -116,7 +116,7 @@ footer{margin:50px 0 60px;font-size:13px;color:var(--muted);max-width:90ch}
     <div class="chart"><h4>The fairness corridor</h4><p class="cap">Binding budget under each fairness rule. Dashed line is demand.</p><div class="legend" id="leg1"></div><div id="c1"></div></div>
     <div class="chart"><h4>Which limit bites first</h4><p class="cap" id="c2cap"></p><div id="c2"></div>
       <h4 style="margin-top:22px">How far over</h4><p class="cap">Demand ÷ binding budget, log scale. Right of 1 is overshoot.</p><div class="legend" id="leg3"></div><div id="c3"></div></div>
-    <div class="chart wide"><h4>Every material against every limit</h4><p class="cap" id="hmcap"></p>
+    <div class="chart wide"><h4>Every material against every limit</h4>
       <div class="tw"><table class="hm" id="tHeat"></table></div>
       <div class="legend" style="margin-top:10px"><span><i style="background:color-mix(in srgb,var(--good) 30%,#fff)"></i>Within budget</span><span><i style="background:color-mix(in srgb,var(--crit) 30%,#fff)"></i>Up to 2×</span><span><i style="background:color-mix(in srgb,var(--crit) 60%,#fff)"></i>2 to 10×</span><span><i style="background:color-mix(in srgb,var(--crit) 90%,#fff)"></i>Over 10×</span><span><i style="background:repeating-linear-gradient(45deg,var(--line) 0 3px,transparent 3px 6px)"></i>No data yet</span></div></div>
     <div class="chart wide"><h4>The budget across Spain</h4><p class="cap" id="mapcap"></p>
@@ -153,8 +153,6 @@ footer{margin:50px 0 60px;font-size:13px;color:var(--muted);max-width:90ch}
     <h3>By limit</h3><div class="tabs" id="indTabs" role="group" aria-label="Indicator"></div><div class="bar" id="indFields"></div>
     <div class="g2"><div><h3>Group shares</h3><div class="tw"><table id="grpTable"></table></div></div><div><h3>Material shares and impact per tonne</h3><div class="tw"><table id="facTable"></table></div></div></div>
   </div></details>
-
-  <footer>All inputs are the illustrative placeholder values from Chapter 10 and the Ramboll slides, to be replaced with verified Spanish data. Map populations are INE figures for 1 January 2025. Edits made here are lost on reload.</footer>
 </main>
 <div id="tip" role="status"></div>
 <script>
@@ -495,7 +493,6 @@ function renderMap(R,mat,prin){
   $("mapRank").innerHTML="<tr><th>Community</th><th class='n'>Share</th><th class='n'>Budget</th></tr>"+[...GEO.regions].sort((a,c)=>c.pop-a.pop).map(g=>`<tr><td>${g.n}</td><td class="n">${pct(g.pop/tot)}</td><td class="n">${b?fT(b.budget*g.pop/tot):""}</td></tr>`).join("");
 }
 function renderHeat(R,prin,space){
-  $("hmcap").textContent=`Demand divided by the tonnage each indicator allows, under ${prin} and ${space}. A value above 1 means that indicator alone is breached.`;
   let h="<tr><th>Material</th>"+S.indicators.map(i=>`<th style="text-align:center">${esc(i.name)}</th>`).join("")+"</tr>";
   for(const m of S.materials){ const D=nz(m.demand); h+=`<tr><td>${esc(m.name)}</td>`;
     for(const i of S.indicators){ const r=R.rows.find(x=>x.p===prin&&x.mat===m.name&&x.ind===i.name), q=D/r.annual;
